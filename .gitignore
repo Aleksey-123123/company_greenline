@@ -1,0 +1,14 @@
+# рабочие файлы
+*.tmp
+*.bak
+~$*
+.DS_Store
+
+# реальные данные компании (в репозиторий кладём только шаблоны *.example.csv)
+data/*.csv
+!data/*.example.csv
+
+# python
+__pycache__/
+*.pyc
+.venv/
