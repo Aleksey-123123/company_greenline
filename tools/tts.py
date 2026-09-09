@@ -148,6 +148,28 @@ def synth_parts(tts, text: str, tmpdir: Path, voice: str, rate: float) -> list:
     return paths
 
 
+def get_espeak(voice: str, rate: float):
+    """
+    Движок создаётся ОДИН раз на процесс. Повторный espeak_Initialize
+    оставляет зарегистрированным колбэк первого экземпляра, и у второго
+    буфер молча остаётся пустым — синтез «проходит», а звука нет.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from espeak_backend import EspeakTTS
+    # rate -1..1 → слов в минуту, 170 это обычный темп
+    return EspeakTTS(voice=voice, wpm=int(170 * (1 + 0.4 * rate)))
+
+
+def synth_parts_espeak(tts, text: str, tmpdir: Path) -> list:
+    """Запасной синтез: espeak-ng. Хуже на слух, но не требует сборки."""
+    paths = []
+    for i, chunk in enumerate(chunks(text)):
+        dest = tmpdir / f"part{i:03d}.wav"
+        tts.to_wav(chunk, dest)
+        paths.append(dest)
+    return paths
+
+
 def wav_duration(paths: list) -> float:
     total = 0.0
     for p in paths:
@@ -233,6 +255,8 @@ def main() -> int:
     ap.add_argument("--only", help="озвучить только сценарии с этой подстрокой")
     ap.add_argument("--no-join", action="store_true",
                     help="не собирать общий файл с главами")
+    ap.add_argument("--engine", choices=("rhvoice", "espeak"), default="rhvoice",
+                    help="rhvoice — лучше на слух; espeak — работает всегда")
     ap.add_argument("--list-voices", action="store_true")
     args = ap.parse_args()
 
@@ -247,8 +271,13 @@ def main() -> int:
         sys.exit(f"нет сценариев в {SCRIPTS}")
 
     OUT.mkdir(parents=True, exist_ok=True)
-    tts, ff = get_tts(), ffmpeg_bin()
-    voice = pick_voice(tts, args.voice)
+    ff = ffmpeg_bin()
+    if args.engine == "rhvoice":
+        tts = get_tts()
+        voice = pick_voice(tts, args.voice)
+    else:
+        voice = "ru" if args.voice == DEFAULT_VOICE else args.voice
+        tts = get_espeak(voice, args.rate)
     items, total = [], 0.0
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -262,7 +291,10 @@ def main() -> int:
 
             part_dir = tmpdir / path.stem
             part_dir.mkdir()
-            parts = synth_parts(tts, text, part_dir, voice, args.rate)
+            if args.engine == "rhvoice":
+                parts = synth_parts(tts, text, part_dir, voice, args.rate)
+            else:
+                parts = synth_parts_espeak(tts, text, part_dir)
             dur = wav_duration(parts)
             to_mp3(ff, parts, mp3, title, n)
 
@@ -276,7 +308,8 @@ def main() -> int:
         print(f"\nодним файлом с главами: {dest.name} "
               f"({dest.stat().st_size/1e6:.1f} МБ)")
 
-    print(f"итого {total/60:.1f} мин, голос {voice}, темп {args.rate}")
+    print(f"итого {total/60:.1f} мин, движок {args.engine}, "
+          f"голос {voice}, темп {args.rate}")
     return 0
 
 
