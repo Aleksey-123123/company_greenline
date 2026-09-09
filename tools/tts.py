@@ -103,7 +103,8 @@ def chunks(text: str, limit: int = 1200):
 
 # --- синтез ------------------------------------------------------------------
 
-RU_VOICES = ("anna", "aleksandr", "elena", "irina", "artemiy", "victoria")
+# Русские голоса RHVoice. Остальные из пакета — других языков.
+RU_VOICES = ("anna", "aleksandr", "elena", "irina", "anatol", "natalia")
 
 
 def get_tts():
@@ -111,7 +112,7 @@ def get_tts():
         from rhvoice_wrapper import TTS
     except ImportError:
         sys.exit("RHVoice не установлен. Запустите tools/setup-tts.sh")
-    return TTS(threads=1, quiet=True)
+    return TTS(threads=1)   # без quiet=: обёртка такого ключа не знает
 
 
 def pick_voice(tts, requested: str) -> str:
