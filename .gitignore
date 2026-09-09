@@ -12,3 +12,7 @@ data/*.csv
 __pycache__/
 *.pyc
 .venv/
+
+# аудио: в git идут сценарии и скрипты, готовый звук — нет
+audio/out/
+.venv-tts/
