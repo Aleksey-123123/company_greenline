@@ -1,0 +1,365 @@
+[0:04]
+So, colleagues, let's probably get started, uh and with the first slide, tell you a little about ourselves. Our company specializes in accounting automation, and we use 1S products for this purpose. At the moment, we now have over 100 offices, not only in Russia, but also globally. That is, we are present in ten countries, and we now have probably over 6,500 employees working in the company. And the majority of them are specialists in implementation and project departments.
+
+[0:36]
+Well, that is, analysts and programmers . Why am I citing these numbers? Because, as a rule, developers and analysts handle the implementation, and my point is that for any task, regardless of complexity, we are ready to find the resources for it. From the perspective of the construction industry, we have been working with this niche, this industry, for over 15 years. And now we have probably over 10,000 clients across the country who are automated using our solution. And today I will tell you a little bit about it. Actually, we develop the products ourselves and they are 1S compatible; that is, they are approved by 1S and have the "1S Compatible" status, which allows us to update both industry-specific configurations and accounting configurations, or flagship 1S configurations, with a single distribution. Which means that we can
+
+[1:30]
+easily support your company in the long term. From the standpoint of the approach to construction automation, I have opened this slide to explain how we generally approach construction automation. And not only that. We believe that trying to solve construction problems with a single product that will be very expensive and likely difficult to manage is problematic and not very optimal, right ? We believe it is better to choose a family of products that will allow us to automate the processes gradually.
+
+[2:05]
+This will allow us to optimize the budget of invested funds, stretch it over time, and let us focus on specific tasks. For example, if there is a task to automate warehouse logistics, material accounting, tracking their movement at construction sites, or resource planning, that is where the " Supply and Warehouse" block comes in.
+
+[2:28]
+Yes, if we are talking about automating accounting activities, and a contracting company wants to expand its accounting functionality, have the ability to distribute general costs by project, and build project-based accounting in general. For this, there is the "Contractor" subsystem. It can be implemented for a reasonable price.
+
+[2:45]
+It does not cost very much. And other modules can be implemented later from the perspective of the construction configuration itself, yes, and what can we offer to contracting companies, and not just in this sector? First of all, we are talking about the automation of accounting, first and foremost. That is , company accounting doesn't always allow us to manage records the way we need to. We often want to distribute costs arbitrarily, we often want to distribute costs not based on the coefficients offered by 1C Accounting, right? We need a tool to allocate certain general costs across a group of objects. Well, standard accounting doesn't have such a tool. Our configuration does. It is also necessary to monitor mutual settlements broken down by construction projects.
+
+[3:34]
+Yes, for accounting, the "nomenclatural groups" directory is usually used for this. But a nomenclatural group is not linked by contract to a supplier, contractor, or customer, right? But in our system, such a link exists. This means we can directly link the nomenclatural group and the contract and view mutual settlements by both contract and project. Well, this is just a small part of what's there.
+
+[3:56]
+Payroll calculation by construction project. There is a separate configuration for this that is installed on top of 1C Payroll. But besides the payroll functions, this construction configuration has the ability to calculate wages based on time worked, which is distributed across construction projects. We usually have a payroll fund for estimators, engineers, and project managers who work on different objects within a single month. And distributing their payroll fund is, well, labor-intensive if we are talking about manual accounting. Even if we distribute it by percentage, it will still be an imprecise calculation, an inaccurate project profitability, especially if salaries are high.
+
+[4:39]
+Inventory management. Well, the lion's share of the estimate is, after all, material stock. Not the lion's share of the estimate, but of the project, meaning its costs, is composed of material resources. Therefore, their automation is extremely important, especially in terms of resource planning, also broken down by tasks, types of work, project stages, and estimate chapters. It is often very difficult to link the estimate nomenclature with the project nomenclature provided by the technical department engineer. It is very difficult then to link the supplier's nomenclature with our project nomenclature. Yes, essentially, we have three names that need to be linked together. Regular accounting or non-industry-specific products are not suitable for this goal, which leads to a huge number of duplicates. Yes, and
+
+[5:20]
+I'm not even talking about the link with, well, people working in the field , and site foremen, and most often there is no connection with the office.
+
+[5:30]
+And, accordingly, the accountant usually duplicates everything manually, that which arrives at the warehouse, and that, well, takes a decent amount of time. Introducing specialized machinery accounting. Well, we are talking about GLONASS waybills, GPS monitoring with fuel sensors and motion sensors, yes, and machinery orders, deploying machinery at sites, accounting for drivers 'hours, maintenance logs, and so on, and workwear accounting. Well, we are primarily talking about the classic PPE card. Uh, we are talking about PPE issuance standards. We are talking about tracking item characteristics, height sizes, shoe sizes, accounting for, uh, glove sizes, headwear, and so on, and management of rental properties and real estate sales transactions.
+
+[6:15]
+Well, such niche specifics that are needed by client-developers or those involved in constructing real estate properties and then leasing or selling them. A connection between the unit layout plan is necessary, as is a connection with the CRM system, deal management, and task management. And we have this block. And a unified system of management accounting and consolidation. What we will be talking about primarily today is financial accounting, consolidated financial reporting, and management accounting.
+
+[6:47]
+This is what is in our product. From a user perspective, yes, we divide people not only by functional responsibilities , but also by departments. Here is the breakdown, starting from the top with the head of the enterprise. And we will start with treasury, budgeting, and management accounting, and then we will descend to the level of financial accounting. That is, we will go in descending order. And the content itself, yes? Um, so we will talk about management accounting as a conceptual solution, we will talk about treasury, how to get quick results for full, well , in order to get complete control over cash funds, yes, how to build budget management and management architecture, how we help automate master budgets and analytical breakdowns for cash flow and P&L statements, yes, we will talk about consolidation and a very important
+
+[7:42]
+point: when we have many 1C databases, we often need to get consolidated information from different sources and bring it into one information database.
+
+[7:53]
+These are the so-called adjacent subsystems. Regarding Bitfinance, thanks to the fact that there is a unified information field, this product will allow compliance with the basic principles of management accounting.
+
+[8:07]
+This is the use of common units of measurement for planning and accounting . This is continuity and the repeated use of information. This is the formation of internal reporting indicators that we need internally.
+
+[8:19]
+Specifically, this is the assessment of the performance of structural divisions . And this is completeness, deep analytics, and periodicity. So these principles are observed in this solution. Thanks to which options, yes?
+
+[8:34]
+Essentially, the Bitfinance software product line provides a quite convenient and reliable tool for planning and controlling a company's funds and cash flows. It includes functionality for creating primary operational and auxiliary budgets, as well as generating master budgets by line items, turnover, scenarios, and financial responsibility centers. In other words, it covers the company's management structure, departments, and other budgeting analytics. For construction companies, it is very useful, for example, to view data by work type or work stage. So, broadly speaking, we have analytics such as customer, contract, and agreement.
+
+[9:14]
+Based on that, we can have turnover items directly, or after the contract and project, we can have objects, product groups, and within those, additional analytics like work stages, work types, or estimate chapters. And we can view the plan-versus-fact for money broken down by each work type or stage, even drilling down to a specific task. There is also preparation and approval of contract drafts, and the creation of payment and accrual schedules, including for financial agreements. Everything starts from the contractual conditions between us and the construction client, or between us and construction subcontractors. There are accrual and payment schedules based on planned work completion stages or legal terms, and it is recommended to work according to them. Also, it ensures centralized payment management.
+
+[10:10]
+For this, there are tools such as a payment calendar and an approval workspace. We will talk about them a little bit later. What does the treasury structure look like? The main functions of the treasury are operational planning and cash flow management. As I said, we start from the contractual conditions. We have payment schedules, and they serve as the basis for generating a cash disbursement request document.
+
+[10:40]
+Specifically for expenditures, yes? We also plan cash receipts if we are working with a buyer or a construction client. Yes, we know that in a quarter, by the end of the reporting period, we will sign the completion certificate.
+
+[10:52]
+Expected to be 2 million. This will be the basis for the planned cash inflow. In the payment schedule, we can distribute our planned costs and expenses by months and years. And this will be the basis for generating the payment register and the payment calendar. The payment calendar is needed to prevent and eliminate cash gaps. We will analyze cash flow and the current state of affairs, as well as future receipts, future expenditures, and balances for a given period, taking into account future expenses or income.
+
+[11:30]
+The second point is the payment registry for current, actual expenses, which are approved separately and generate payment orders and cash documents in terms of working with the requests themselves, right? So, we have a "Request for Cash Disbursement" document. It can contain a lot of analytical data. First and foremost, this analytics includes the construction project, the counterparty, and the expense item. Within the expense item, we can, in turn, detail our costs down to the level of work stages, types of work, or whatever other analytics you need for your accounting. The request for cash disbursement also relates to a specific scenario. This means we can select a particular planning scenario, such as a quarterly plan, an annual plan, a monthly plan, and so on. And the request is linked to some underlying
+
+[12:27]
+basis. This could be a document for planned receipts or planned disbursements, an invoice from a supplier, a purchase order, or data from the supply and warehouse subsystem if we are talking about procuring material assets. And here, as you can see, there are statuses and an approval tab right above the "Approve" button.
+
+[12:52]
+We will talk about the approval process separately, but the point is that any financial document can be approved or rejected. before it makes any entries.
+
+[13:05]
+From the treasury perspective, we are talking about the fact that treasury is needed for managing the company's cash flows and funds. This includes preparing the cash flow budget, forming payment forecasts, creating requests, approving and endorsing these requests, forming payment registries, generating payment documents, and so on. Yes. The key element here is likely the functionality of the treasurer's workspace, which you see on the screen now. It is designed to allow for the operational planning of payments. The options in this workspace are as follows. We can view balances in bank accounts and cash registers. We can view actually executed payments. We can view planned payments and planned cash receipts, meaning the plan for a specific date, based on previous documents and contractual terms, right?
+
+[13:59]
+We can view balances based on payment forecasts, and we can view the minimum required balance if we have set it previously for an account or cash register. We can view available funds taking this minimum required balance into account. the cash flow itself, yes , the plan-versus-actual analysis for cash disbursement requests. Well, for that, there are columns for actual and planned figures, as well as balances for previously unpaid cash disbursement requests. Meaning, how much we still owe on previous requests that are still pending for the current period. The payment registry document itself. As you can see here, it is generated based on contractual terms and on cash disbursement requests. That is, as I showed earlier in the table—let me scroll back a bit—we have a payment schedule and cash disbursement requests
+
+[14:53]
+, which serve as the basis for us to schedule funds for a specific date. We approved these requests, and they ended up in the payment registries here, right? They are located at the bottom, grouped by a specific date. And this payment registry can be additionally approved by responsible persons once more before generating payment orders.
+
+[15:14]
+Essentially, this is another "foolproof " safeguard in case we missed something , forgot something, or want to add something. The payment registry then serves as the basis for generating payment orders, which are exported to the client bank. We receive confirmation of payment from the client bank, and a bank statement is generated . So the process is fully automated from beginning to end. Now, the payment orders themselves, as you can see, are sent for payment, and we specify the amount to be paid, whether in full or just a part. We can split the payment, postpone the payment, and so on. The planned receipt document itself. We were talking about the expenditure side before, right? Now we are talking about the income side. For the income side, the basis for a planned receipt can be an invoice for payment, contractual
+
+[16:05]
+terms, or even a document with no basis at all. That is, we simply plan that we will have an incoming payment soon. And in this case, we similarly specify the amount, which object, which contract, and which analytics it relates to. It also lands in this document, in the treasurer's workspace, so that we can analyze when, what, and from whom we will receive funds on a given date and what the amount will be. Payment based on the terms of the contract with the buyer. We have the ability to enter additional parameters for contracts that involve recurring payments, such as lease agreements or electricity supply contracts. The "additional terms " document is specifically designed for this. Using this document, a payment schedule for the contract is created.
+
+[16:56]
+Cash planning documents are generated automatically. So, it is not necessary to manually create the previous documents I described, the planned receipts and planned expenditures. As I said, if there are contractual terms, you can break them down monthly into equal or varying payments. You are welcome to. For this, there is a payment schedule tab, which is for when we are paying, right? And an accrual schedule, if we are accruing this as debt from a buyer or a construction client, for example; we know that one sale will occur in a quarter, a second sale in the next quarter, and so on.
+
+[17:29]
+And taking this knowledge into account, we can enter it into the additional terms of the contract and specify the portions in which we will receive the amounts. And this information also goes into the treasurer's workstation. This means we can plan cash flow for a long time, up to a year. If we are talking about long-term planning, it can be even longer, but it depends on the quality of that planning; the accuracy of this planning for management does not need to be as precise as accounting , but it must be adequate for making management decisions. If your accounting is currently set up in such a way that there is more or less accurate information about when you submit work completion certificates or project stages, you can, in principle, plan for a longer perspective than one year. Now, the approval workstation.
+
+[18:18]
+Well, here we have, uh, here we have the ability to analyze the documents awaiting approval. This could be a cash expenditure request, and you can make a decision whether to approve it or not.
+
+[18:31]
+Moreover, there is not only this approval workstation, but also an approval interface not in the main 1C database, but a mobile application, which is really great for managers at different levels. So, we might be on a train, in a car, or even about to fly out. And we have nothing at hand except a mobile phone. No problem. For this, there is the BitFinance mobile application. On the first tab on the left, you see a list of expenditure requests with dates. When you open a specific request, the central part opens up. You see the document, you see its amount, you see if it is over-budget, and for the payment figure , you can click the "Show details" button. And there is information on the profit center, the counterparty to be paid, the contract, the object, the scenario, and the turnover item, or in other words, the cost item.
+
+[19:28]
+Unfortunately, due to the pop-up window with actions—approved, rejected—it is not visible here. There is also the accounting payment purpose, which can be uploaded from the client bank or entered manually by an accountant, yes.
+
+[19:41]
+Often the information at the top of the screen is not enough, so we need to see the payment purpose as well, and it is available. And we can also approve or reject this via Android, iOS, or WinPhone just the same. Yes. Oh, excuse me, I forgot about the approval process . There is even a separate report.
+
+[20:04]
+Colleagues, if anyone has a large approval structure, there is a separate report that allows you to see the time spent at each document status, how long the approval took, and whether the document got stuck at a certain stage longer than expected. And most importantly, to see who exactly the approval process stalled on, who takes the most time during the approval. Well , to somehow optimize the approval process so that it goes faster in the future. Payment terms. Actually, here in the contract draft on the payment terms tab, you can manage the payment terms of this contract by event. So, here we have two events. Signed contract, advance payment, yes, and closed act. And remember, I previously showed the planned cash inflow document , which is the basis for creating a cash plan for the current period, right
+
+[20:59]
+? How much we expect to receive, yes? Well, we might also have preliminary pre-contractual conditions before we sign the contract, right? We might first have an interview, then communication with the client, then agreement on terms, receiving a quote, and only then, for example, a signed contract, and we receive an advance of a certain amount. We base our plans for incoming funds to our bank account on this. Then the act is closed and part of the amount is credited. It turns out we are already utilizing them, yes, and these events can be spread out over time. And the system, by us specifying these terms and the amounts in these terms—how much we expect to receive after one act or another—allows us to forecast future payments taking these events into account. So they also serve as the basis for forming planned cash
+
+[21:49]
+inflows and outflows. This allows us to calculate the payment schedule and set the order in which the payment schedule will be filled. That is the key thing.
+
+[21:59]
+So, actually, here is the event, the appearance, right? We can see that it is possible to specify a specific amount in rubles, yes, or a percentage of the contract amount, and it will calculate this percentage and then output it to the planned cash inflow plan in the treasurer's workspace, so we can see there how much we expect to receive. And, strictly speaking, the payment calendar report itself is built based on data on cash balances and movements, on turnovers, based on submitted payment requests, payment forecasts, and planned inflows. The report displays cash balances in specific accounts and in the cash office, based on both accounting data and management accounting data. The point is that there is a concept of management statements, that is, those that are not yet reflected in our accounting, but we plan to reflect them
+
+[22:53]
+in the future. Well, that is, certain known payments, they are reflected only in management registers. They do not end up in account fifty-one or account fifty-two. And, well, the payment calendar, of course, is needed, it serves one purpose: the elimination of cash gaps. We look at whether there will be enough money, taking into account the fact that we will have some planned payments or planned cash expenditures. And from the point of view of the interaction between accounting and management accounting, there are three approaches. That is, a single integrated system, a golden mean , or a completely autonomous system.
+
+[23:29]
+All three have a right to exist. And we have already implemented all three variants for various clients. Uh, strictly speaking, the interaction between accounting and management accounting. One approach assumes that the accounting and management accounting registers will be maintained in a single common enterprise database.
+
+[23:50]
+In this case, the consistency of accounting assumes that we are pursuing a single reflection of accounting information. Our reference information does not differ, that is, contracts, counterparties. And the hierarchy of objects does not differ, the hierarchy of analytics within the object does not differ. Well, I mean the estimate section, by object, type of work, stage of work. They must be unified for both management and accounting. If we are talking about a related common system, there must be a connection between accounting registers and internal reporting, ensuring in some cases the reconciliation of management data with financial accounting and reporting indicators, and the formation of a single accounting policy for financial and management accounting. In an integrated accounting system. Financial
+
+[24:37]
+accounting is reorganized into an alternative information base for forming management decisions. That is, we leave accounting in its subsystem. That is, it remains a single window, but the accounting department works within its own subsystems of purchases, sales, and so on, right? And BitFinance works in its own treasury and budgeting blocks. So. Another option for building a management accounting system assumes autonomy, where financial and management accounting are separated, meaning two distinct windows and two separate databases that require data exchange. They are completely independent. In enterprises, a special department is usually created for such accounting, or a person is appointed to be responsible for management records, because without a dedicated employee, it's impossible to maintain it in a
+
+[25:28]
+reasonable timeframe, with reasonable accuracy, and in a realistic manner. The functions of the accounting department are limited to recording financial and business activities, while internal accounting must remain hidden from them. Ideally, the accounting department shouldn't even know what is happening in management accounting. We configure this using access rights. Both scenarios are possible. However, the system yields better results when it is integrated and unified in a single window. When they are separated and autonomous, it is clear that we incur costs for the data exchange. Therefore, we choose different options for different clients . There are cases where we have a separate management database and a separate accounting one. We also consider such scenarios. It's just that you need to consider the integration
+
+[26:12]
+aspect if it is required. In the last item of our webinar program, we addressed the interaction with related subsystems. Yes, related subsystems include, among others, accounting subsystems. Besides that, there is also a subsystem for automating the construction industry. This is the contractor subsystem. We will talk about it today. It expands accounting functionality, as does the supply and warehouse subsystem. I will talk about that one a bit later. From the perspective of the contractor subsystem , what does it allow us to do? It does not change the logic of accounting.
+
+[26:49]
+That is, your list of basic documents remains the same as what you currently have. You keep the same accounting policies and the same chart of accounts , but the functionality of several documents is expanded. Firstly, we can maintain records for the customer and the general contractor. For this, in sales and purchase documents, there is a separate document for the realization of general contractor services and the receipt of general contractor services.
+
+[27:15]
+It is calculated as a percentage of the turnover of incoming or outgoing services, depending on our role at the construction site. And it calculates the volume of general contractor services based on this percentage.
+
+[27:27]
+Automatically, yes. For this, there is a separate account for tracking overhead, offsetting advances, recording warranty retentions, as well as tracking compliance and offsetting advances in proportion to completed work. That is, we can set an advance payment offset percentage in the contract, and in that case, the system will automatically analyze the turnover on account 90 and account 62, closing only the portion specified in the contract. For example, if it is 70%, it will only offset 70%of the advance payment we previously received. Usually , an accountant does this manually, so this functionality really helps save time. Warranty retention uses separate accounting accounts in the chart of accounts, specifically 76.61. They are accounted for during receipt and realization. I mean the KS forms, both incoming and outgoing. And there is
+
+[28:18]
+also a warranty retention percentage there. After the construction project is completed, a service document is created for the warranty retention closure, which clears account 76.61 to account 62 or 60. Well, depending on who the warranty is with, whether it's the client or the contractor, right?
+
+[28:35]
+And if there is any claim amount that we are re-invoicing, yes, we don't return the money for it, and it is automatically allocated to account 76.02. And for warranty purposes, off-balance sheet accounts 009 and 008 are used. PBU 2 is a separate topic, but I will touch on it briefly. This applies to situations where we have a long-term project exceeding 12 months, and we are incurring costs now, but the KS form is not being signed by the client for some reason. Yes, there is work-in-progress in bookkeeping for this, but we need to reflect unbilled revenue to understand our volume of revenue as the project progresses. In this case, a separate document PBU 2/2008 is used, which makes entries on account 46, specifically 46.02, and revenue on account 90, but only for accounting purposes. Meaning, account 90 will be reflected for accounting,
+
+[29:29]
+and account 46 will be reflected for accounting, while account 90 will also reflect tax accounting, but account 46 will not have tax accounting. And when we close the year, certain temporary or permanent differences are formed.
+
+[29:43]
+Depending on who we are, the client or the contractor, once we record the incoming or outgoing KS form, this temporary difference or obligation will close automatically when closing the income tax. So, this tool is necessary for long-term construction projects, using temporary and permanent accounting differences for the correct reflection of income tax.
+
+[30:08]
+Industry-standard forms KS-2, KS-3, M- 29, of course, the consolidated KS-3 is also available, as well as the M-19 report. And also, the cost analysis of construction projects. There is a report that allows us to group expense items by type and see the profitability of the project in detail. Let’s dive in. I usually demonstrate the product using a real-life client as an example, focusing on specific issues. Perhaps, after reading this text, you'll realize that something similar exists in your own organization, right? Let's start with a case that is probably medium in size. The company has over 400 employees in total, including production staff, and they carry out construction, installation, and repair work for oil refining and chemical industry facilities. Geographically, they are located in the Nizhny Novgorod
+
+[30:59]
+region. There were about thirty users at the start. Towards the end, we added a financial accounting module, and the number of users grew to about a hundred including financial management. The issues. We were migrating from 1C 7.7 for manufacturing, services, and accounting, known as PUB. So, yes, the 7.7 version had not been supported for a long time. It lacked unified accounting, many standard services, and there was no automation for any operations. In other words, an accountant could do whatever they wanted; there was no objective control.
+
+[31:34]
+The accountant wanted to increase control over their own actions and their department, while the manager wanted to automate financial indicators , reports, and analyze the profitability of projects. With 7.7, he couldn't obtain that information. There was a complex and multi-stage allocation of general business and production expenses. Moreover, this affected the financial results of the departments, as they needed to allocate costs to departments to calculate profitability, which in turn affected the manager's KPI and their bonus.
+
+[32:09]
+Essentially, warehouse accounting and operational material tracking at construction sites were not streamlined . I mean, the procurement and logistics team was purchasing items. They often bought things no longer required at the sites or missed the deadlines specified in the supply requests. Essentially, they were not met for one reason or another because there was no system in place to allow for objective control.
+
+[32:39]
+Resource planning was also absent; there was a cost estimate that was processed by the technical office engineer. The engineer entered the estimate data according to the client's specifications. Then they decomposed the client's estimate down to the level of specific materials that weren't listed in the official rates but needed to be purchased for various reasons. We streamlined this system for them and implemented three modules. These are Contracting, Procurement, and Mechanization. From the contractor's perspective, as I mentioned, I suggest looking at this through screenshots and practical examples. We automated the allocation of general expenses. So, for this purpose, there is a document that allows for distributing any costs between any accounts based on arbitrary shares or coefficients. Essentially,
+
+[33:27]
+this tool is universal. It takes any turnover from any account or group of accounts. And thanks to the coefficients that you specify manually, or load from the turnovers of other accounts, it distributes these two accounts or groups of accounts according to those specific coefficients. The simplest example is the distribution of account twenty-five . It is often distributed proportionally to revenue to account twenty, but sometimes this allocation base does not suit us. Well, because there might be no revenue at all. We have work-in-progress, but there are costs that need to be distributed now, or just left on account twenty, right.
+
+[34:10]
+Therefore, we cannot use this allocation base. We need to use some other tool. This document allows for this mechanism to function; it doesn't analyze accounting or, let's say, accounting policies. It does exactly what the user tells it to do. So, in principle, it is universal for different types of operations. Revenue accounting based on percentage of completion. We have automated a mechanism for cases where, at the end of a quarter or half-year, there is only a volume of costs, but the certificate of completion is not signed for some reason. This needs to be correctly reflected from the perspective of income tax accounting.
+
+[34:45]
+And the client was using, and is still using, PBU 18/02. We have automated this mechanism using this document. I think it is better to look at it in detail, perhaps for those who are interested. Because it is quite a niche specialty. If anyone needs a separate demonstration, please leave your contact details after the webinar. I will contact you separately, and we can take a look at this document. Or answer any other questions if they remain.
+
+[35:10]
+Full-scale object-oriented accounting. Here we see two reports. Firstly, this is a report on the cost structure and financial results by object. Managers at various levels need to see, broken down by cost type, how much money we eventually spent, how much marginal income we received, and what the final profitability and profit of the object are. A standard accounting report will not display this information. A standard trial balance will not provide this information. It simply doesn't contain these indicators. Our developers have created a report in our subcontractor subsystem where profitability is calculated according to formulas. The formula is described in the user manual. We provide the user manual and train the client on which columns are filled with which data. So, all this information is available. The
+
+[35:56]
+second report is a standard trial balance for account twenty, but with a small addition. Sometimes managers at various levels, and even the accounting department, want to see how much money we have spent on a particular site, broken down by type of work, project stage, estimate sections, or any other custom analytics we might want to see.
+
+[36:16]
+It could be a sub-site, it could be, I don't know, a ground cycle, it could be excavation work, it could be landscaping; that is, it can be both stages and types of work. In account 20 , we don't have such analytics in standard accounting. But in our system, there is essentially a fourth sub-account for account 20, which allows for tracking certain management expenses within the framework of accounting, essentially. That is, in an accounting document like an invoice request or a service receipt, we can specify additional custom internal, so-called "management," analytics. And this is done without system customization, as it is standard functionality. Next, we automated the accounting of subcontracting work and the accounting of our own work. To account for subcontracting work, there is account 20.5. For accounting of our
+
+[37:07]
+own work. Together, they form account 20 by sub-accounts. We can view consolidated information both in terms of our own work and in terms of subcontracting work. Account 20.5 has analytics by nomenclature group—that is, the site and the subcontractor or counterparty. And cost analytics. If we need or want to view account 20 in terms of our own internal breakdowns, right? Let's move smoothly to another subsystem. This is supply and warehouse . The situation with it is more interesting. Because it does not supplement accounting; it is purely operational management accounting at construction sites. That is, it is a system for planning material resources in accordance with the estimate, for setting purchase limits for procurement staff, for automating the tracking of material usage requests and purchase requests, for automating price
+
+[38:06]
+monitoring work, particularly with suppliers, and for working with nomenclature analogs, substitutions, and replacements. Including cases where there is a change in packaging, or where some units of measurement are converted into others. Well, this is mostly needed for bulk materials. It is used to monitor the plan-fact for receipt and the plan-fact for material consumption, to see how much we planned to buy according to the estimate, how much we actually bought in quantity and monetary terms, and to see how much we were supposed to write off for the Completion Certificate and how much was actually written off. This is to automate not only the technical department, site managers, and project managers, but also to help the accountant see what needs to be written off against the Completion Certificate.
+
+[38:47]
+Meaning, whether they match each other, the Completion Certificate and the write-offs. And a project manager can check whether the foreman actually wrote off those materials. Maybe he hasn't even performed that work yet. He will have a report for that as well.
+
+[38:59]
+And it's possible to handle everything regarding material requests, logging, and write-offs in the mobile app. It is available separately for Android phones . Unfortunately, it is not currently available for iOS. It used to be. Well, it works perfectly fine on Android, so you can easily download it. Ala will send a Google Play link in the chat.
+
+[39:24]
+Another case. Um, one more example. A smaller company, about 100 people, meaning both offices and construction headquarters. They carry out the full cycle, the design cycle of utility networks. And the construction of industrial facilities and road structures, that is, including a road construction department. There are few users, about 10 at the start. This includes management, supply department, and accounting. At the start, there were about 40 by the time of completion because they began to grow. And there was a need to scale, and a need to connect project managers, foremen, and site managers to this system so they could adequately adapt to the company's new realities and restructure their processes. Why did we switch? Because operational warehouse accounting was not automated at all. That is, assets
+
+[40:16]
+were issued from the warehouse without any justification. Well, yes, we signed for receiving materials, but there was no basis for issuing them, no request or order for issuance. Yes, often items were purchased that were not actually in the estimate and were not regulated.
+
+[40:34]
+Well, it wasn't a budget overrun. It turns out we might buy rags or paintbrushes that aren't physically in the estimate, but we have a certain volume of losses budgeted for that, and in fact, these are planned expenses.
+
+[40:51]
+They just needed to be limited, but there was no tool to set a limit for a specific material on a project, and the accounting of substitutions, including divisible or weighed materials, was not automated. Special equipment accounting was also not automated; besides material resources, we automated the accounting of trip tickets, fuel and lubricants, repairs, and assembly units . And the supply plan was also missing.
+
+[41:16]
+We had some sort of operational plan for construction work execution, a daily journal at the sites, right? But materials were not purchased in accordance with it. We bought everything for the whole year. It would sit at the sites for half a year. Well, it inevitably spoiled, obviously. So, we needed an automated system so that everything would be in a single window and integrated with dual accounting, which is important. We implemented this particular scheme. It is a standard one . There are five conceptual blocks here : planning, requisitions, procurement, logistics, and warehouse. At the planning stage, we can upload a local or object-specific estimate here, broken down. This is the Grand-Smeta format, if you work in Grand-Smeta. If you use Smeta.ru or any other accounting system for estimates, you
+
+[42:03]
+can export from any estimating software to Excel format. In other words, this 1S functionality also accepts Excel files. After we have uploaded the estimate, we can decompose the customer’s estimate down to the level of specific materials. Typically, this is already done by a technical engineer . They indicate that, in order to perform a certain job at the site, I need to buy specific resources and list the specific materials required. Then, based on these decomposed materials, the site manager creates requisitions in accordance with the work plan and specifies the date by which these resources must be delivered. The procurement officer then processes this requisition, checks the current free balances and reserves of these resources, and—working with this data from the sites, knowing which balances are free and which are not—they can
+
+[42:50]
+put this material into reserve without buying from scratch, without spending company money, or choose to buy from scratch and then monitor prices. In other words, you can also monitor prices by supplier to see who offered the best terms, and then place a specific order with a supplier based on an invoice from that specific supplier with specific financial terms. Well, and then it's acceptance at the site and movement on-site. So, here we have the material requisitions shown. We have a specific site, we have a specific material-responsible person, and we have specific storage locations.
+
+[43:28]
+Basically, the company I’m talking about brought order by ensuring that they issued material resources from sites or from the main material warehouse only against a requisition.
+
+[43:38]
+Order was established, meaning they had it clearly marked that this material arrived specifically for this requisition. This was visible in the 1S system. And, if necessary, you can also implement barcoding here. This is another feature that can be implemented using a data collection terminal— sorry, a data collection terminal or a barcode scanner. You scan the material resources so that they are added to our warehouse receipt. This is also convenient. Then the warehouse worker won’t spend much time on issuing items. They just scan them, click through, and hand them over. Also cool.
+
+[44:09]
+And the project participants understand who, when, and to whom something will be delivered, right? So, here we can see the available balance, what contractors currently have, our price monitoring data, what is currently in transit, and what is required for procurement. And the procurement manager, seeing this information, either puts it into reserve, orders it from suppliers if they have already monitored prices, or monitors prices.
+
+[44:34]
+They always have these three options. Actually, for the project as a whole, we can view a report on materials. Moreover, materials can be broken down by types or stages of work. That is, the report just needs to be configured for this. Here you can see information about the planned quantity according to the estimate. Well, going through the columns. The planned quantity column is how much we planned in quantitative terms according to the estimate. The actual quantity column is how many requests we received from the site manager, right? The estimated cost is how much it costs us according to the estimate and pricing. The actual amount is the quantitative expression of what we received via supplier invoices at the site or warehouse. The actual cost is what we received according to the invoices and the variance. Quantitative
+
+[45:25]
+plan vs. actual and cost plan vs. actual. The most key point is the last column, over-budget requests. If a resource was not in the estimate but was deemed necessary, we must analyze the reasons why it was decided to be purchased. For this, there is a separate column for over-limit, where we track all these over-budget requests and can approve or reject them, depending on the decision we make. Uh, and traceability of the estimate item.
+
+[45:56]
+So, what was I talking about? Often, we need to look not only at our internal project nomenclature but also at the supplier's nomenclature and the estimate nomenclature; to link these three names, there are separate service documents in this block, and they allow us to generate such a final report. So, here we see the original nomenclature from the estimate, our internal nomenclature, and the project name.
+
+[46:23]
+Replacement nomenclature is used if there was a substitution of nomenclature for something else, a more expensive or cheaper analog. And we can see the commercial nomenclature here.
+
+[46:32]
+And most importantly, we can see the planned quantity, the quantity that was replaced—even though they may be measured in different units—as well as actual receipt and actual consumption. And the cost of a stage or type of work, I want to emphasize that this is only material cost. So, there are no labor costs here, no depreciation costs, or overhead expenses. These are all accounting data , right? Can we determine the operational material component of the project here? Some contractors, well, some clients and partners say: "As a manager, I would like to see the project cost, not necessarily in real-time, but at least before the month-end closing, to make decisions on where we underperformed." Because the month-end closing will happen in a few months, and by then, the information won't be relevant anymore. That is
+
+[47:26]
+exactly what financial management is used for. So, the finance block I showed earlier has a certain continuation. We looked at the treasury and working with payment requests, but there is also a budgeting block, a budget of income and expenses, where we can plan spending for each month and then collect actual data from accounting. It allows us to see in monetary terms how much we planned to spend per month on a specific project, sub-project, work stage, and expense item, versus what we actually spent.
+
+[48:01]
+And this applies not only to the expense side but also to the revenue side. After all, we look at the budget of income and expenses not just in terms of costs, but also income. And we see the final balance, how it all turned out, and how well we performed.
+
+[48:13]
+This is the financial block that allows you to see a project's profitability before the month closes. Now, let me return briefly to procurement. There is an option here to work with the supplier's nomenclature, as I mentioned , and site managers see the actual supply requests on-site because they generate them themselves. We believe that site managers should be involved in the process of receiving and consuming materials. Of course, this could be done by a warehouse worker, if there is one assigned, or an accountant , but then I don't really understand the division of responsibility, because the accountant is not on-site; they aren't there. They would receive information about material consumption only weeks, or even months, after it is actually written off. So, it's not just slow accuracy; the information's
+
+[49:05]
+relevance is non-existent, right? Especially when we talk about remote sites, because now our clients are even starting to build in Donetsk, which is quite far away. Not to mention any Siberian sites, which are at a very significant distance. And if we don't connect site managers to it, well, it will be a system that gives us information in a few months, while we've already made a decision, essentially guessing blindly.
+
+[49:33]
+Efficiency is needed at the sites, so site managers must be connected without fail. Although this is not a mandatory requirement for implementation, meaning we can look at different options as you see this process yourself, we definitely recommend it. Operational accounting should still be conducted hand-in-hand with bookkeeping. This is, well, not exactly a mandatory step, again, it is of a recommendatory nature , because in this case our system gives you a greater result. We can export these documents from the supply and warehouse system into the accounting system and see already finished documents. That is, the goal of this processing is to create accounting documents automatically and in finished form. So that the accountant doesn't have to manually enter them again. This processing is included in the standard
+
+[50:20]
+functionality of our system. You can also take a look at it in the demo version and check it out from the inside. And also the mobile site manager, which is what allows us to perform certain actions at the site.
+
+[50:33]
+This includes requests for material expenditure, requests for material procurement, excuse me, receiving at the site, and issuing from the site. And there is a fourth type of operation —issuing PPE and fixed assets into operation, or various assets, inventory , and accessories to our employees, with subsequent export to bookkeeping as documents for transfer into operation. Well, not immediately, but after the accountant verifies this information, of course. Benefits. Well, actually, they are described on the screen. I would, perhaps, like to emphasize only one thing. That is, after all, operative and reliable information on the sites, if we structure the process correctly.
+
+[51:12]
+Because the system allows us to unite procurement specialists, technical engineers, site managers, accountants, and project managers into one system.
+
+[51:23]
+They won't interfere with each other because access rights are set up quite well and effectively. If we give site managers limited rights, they will only see what they need, that is, receiving, shipping, requests, reports on themselves, and that's all. Well, the rest of the benefits go without saying.
+
+[51:43]
+And when does this give the maximum result, as I said, I'll start a little from the end. Operational accounting goes hand-in-hand with bookkeeping, because I've already mentioned this.
+
+[51:51]
+And the fourth point refers to the operation of machines and mechanisms, that is, the block for mechanization and motor transport. I think we'll skip it for now. Well, it refers to the fact that you must have your own fleet of vehicles. If you are leasing equipment or renting it, well, you won't really need this block. And, for example, your own reinforced concrete production should not be the main scope or line of business. Well, because when companies are primarily manufacturing, not construction, they still need to keep track of serial or custom production, and this system doesn't automate that.
+
+[52:25]
+Meaning, you’ll either have to customize it or look for ERP systems, like comprehensive automation, 1C, or 1C: ERP. And the MTO department should have at least three people. Well, the reason I arrived at this number is because a person essentially has to perform the following actions. They have to process requests, monitor suppliers, register invoices for payment, receive information from accounting that an invoice has been paid, and then contact the supplier to discuss logistics: when it will arrive and by what means. Ah, and they must also monitor that everything was accepted at the site. So, their work usually ends when everything has been delivered to the site and someone has signed the delivery note on the spot confirming receipt. Yes. Sometimes the process isn't just that; sometimes the MTO process ends when a financial
+
+[53:20]
+accounting document reaches their department, they record it, and then pass it on to accounting. Sometimes it's like that, but in any case, it shouldn't be just one person—they simply wouldn't physically have the time. Therefore, well, one group should create the requests, and another should process them. In our opinion, the estimate. An estimate isn't born at the moment of project delivery, but is formed in advance. Well yes, in this case, we could certainly work without estimates, but that would be working on the fly. Meaning, essentially, we are recording the facts without any planning. And this, well, means that most likely, the current business process is not regulated in any way.
+
+[53:56]
+Because, well, in my memory, there hasn't been a single client who didn't plan project costs in advance, right? If they plan project costs in advance, they must be relying on something. It could be statistics, it could be experience, it could be the customer's estimate, or it could be something else , but there must be some internal metrics. They have to base their conclusions on something, right? And these metrics can be entered here to at least calculate the materials. Well, that is to say, this can be done in advance. So, let’s get back to our BitFinance, right? So we have, uh, It is possible to decompose a construction project down to the task level. Well, so, roughly speaking, we have a task for the legal department to approve a contract, to review it, right? The subsequent task is for the accountants
+
+[54:52]
+to sign off, for the chief project engineers to sign off, and for the company heads to sign off. For instance , there is a task to dig a trench, and within that, a subtask to drive piles, and within that, a task to supply materials to that site. Yes. So, for task management, there is this diagram you see on the screen now. It is unfortunately not very clear. This just shows a business process with a start and a finish, yes. Meaning there are some, how to explain? Uh. Essentially, the process system object manages the lifecycle of created business processes from start to finish, right? That is, the algorithm describes the logic of the business process, the interrelation and sequence of navigating the process nodes. After the start, the process creates a task and sends it to the executor. The executor, while
+
+[55:43]
+processing the document using commands, such as "done" or "redirect," determines the further route of document processing, and the completion of this task leads, for example, to moving the process forward. So, we drove the piles in the trench, and the person marked in their mobile app that it was done. The task is broadcast to the next person that, for example, pouring concrete needs to be scheduled for tomorrow. Poured the concrete, marked it as done. And the project manager checked the info—well, receives the information that it needs to be verified. The project manager received the alert, clicked "complete," "I've checked," and accordingly, it will be possible to write off materials and so on, up to the KS forms. A budget is understood as a designed form consisting of a specific set of items that characterize a particular area of
+
+[56:35]
+activity, for example, procurement or sales, or the company's work as a whole , such as all enterprise income or expenses for a period. In Bitfin, you can enter an unlimited number of budgets of various types, including operational budgets, sales budgets, procurement budgets, master budgets, cash flow budgets, income and expense budgets, and auxiliary budgets. You can develop the set and structure of budgets yourself. I have just opened the directory called "Turnover Items."
+
+[57:05]
+It is key to the budgeting subsystem. In accordance with the elements of this directory, company turnovers are detailed during planning and analysis of actual information. That is, we determine the set of turnover items ourselves, based on the intended budget forms and the required level of detail.
+
+[57:21]
+As I said, for builders, it is most interesting to look at the object, sub-object, work stage, type of work, estimate chapter, and specific costs. Material, nomenclature, or a cost for an employee via payroll, or a cost for a fixed asset, or a cost for a subcontractor. Accordingly, turnover items can be uploaded from an Excel file. You see, there is even a separate button for this to upload from MS Excel . That is, we can prepare them in advance in Excel and then upload them in their final form. Here is an example where we added a type of work or a work plan to a turnover item. Well, that is, a stage of work, yes, those are analytics. There can be up to 17 of them. You can add up to 17 analytics to your reports and detail your internal reporting significantly. Budget variance analysis. Well, here, the
+
+[58:20]
+point is that management accounting is good because we can choose the depth of analysis we need. For one executive, it is one depth of analysis; for another, it is different. For many companies, this type of budget variance analysis report is, in principle, enough. That is, when we look at information on cash inflows and outflows by objects, sub-objects, and work stages, we look at management analytics, and that is enough for us. But sometimes we have a group of companies working. Well, how sometimes. Many construction companies we met with told us: "We have an individual entrepreneur, a joint-stock company, and a limited liability company, and they are all interconnected." The individual entrepreneur performs some installation work, right? The LLC supplies it with materials, and the other LLC is our
+
+[59:07]
+general contractor, right? This is all within the framework of a single corporate structure. And this all needs to be managed in a consolidated way. That is a slightly different story, but it can also be automated using BitFinance and its budgeting model.
+
+[59:21]
+Actually, for many companies at the first stage, partial consolidation is sufficient, where only intra-group balances and settlement turnovers are excluded. Moreover, we exclude turnovers in cash flow statements. This is cash flow and the budget of cash flows. And we can remove balances from the group's balance sheet. Actually, if we choose simple consolidation, which is sufficient, well, again, for the first stages when we are just starting to work with BitFinance, it is necessary to enter additional analytics for the counterparty, and then exclude all intra-group operations using filters. The reporting may not be perfectly accurate, but for the purpose of management accounting and making those managerial decisions, it will be enough. Limitations on the application of full consolidation. That is, all
+
+[1:00:07]
+companies in the group must belong to one owner, well, rather indirectly than directly, right? And, accordingly, there are no other business owners. In other words, adjustments for non-controlling interests will not be required. Second. All companies were established by the owner or their structures, or they already existed and were acquired. Accordingly, there is no premium paid to the seller upon acquiring the company. Third.
+
+[1:00:33]
+Individual management reporting is prepared correctly and requires no adjustments. Management accounting for all companies is maintained either based on a unified accounting policy or with minimal necessary adjustments. And these three main constraints when preparing consolidated reports— intercompany balances and debts must be fully eliminated, right? To do this, we use the comparison of mutual debt amounts; Bitfinance has an intercompany reconciliation portal where you can generate reconciliation statements for internal settlements, even in different currencies. So, this allows us to eliminate these intercompany settlements between groups of companies . And, of course, to build consolidated information about an entity with participants of three, four, or more legal entities. Now, about the Bitfinance product line in terms of
+
+[1:01:31]
+cost—we always discuss not only the functionality but also what all this actually costs. Uh. For a start, the Professional (Prof) version or the Standard version is probably most suitable. There is also a Treasury version starting at 50,000 rubles.
+
+[1:01:49]
+Consolidation is a management accounting module for when you have a group of companies. Although, if we look at our recent projects, we have mostly been implementing the Professional version for 150. Also, about Bitfinance, it’s worth noting that there are no license quantity limits, which is very pleasant. So you buy it for, say, 150, and there are no license restrictions. You simply, well, you can work with as many users as your server can handle. Uh. The only thing is that Bitfinance requires some kind of shell. "Enterprise Accounting" is typically used for this. And " Enterprise Accounting" has its own licenses. So, roughly speaking, there is a separation between the accounting block and the financial block. Yes, in financial accounting, you have no license limits, but for accounting, standard 1C rules apply. One connection
+
+[1:02:40]
+, one license. Now, about the impact of implementing Bitfinance. Clearly, we drew this structure based on dozens of our cases, and we think it is plus-minus correct, although implementation was done differently at various companies. We are talking about the average payback period when we implement treasury, cash flow, and budget planning blocks for companies with at least 50 employees. I mean the scale of the enterprise; the number of users might be smaller, up to 15—it could be 3, 5, or 10. And it cuts the time spent on treasury by about 40%over the year, so some noticeable changes do appear. But again, all of this is measured, probably, for each specific enterprise individually and uniquely.
+
+[1:03:33]
+Because for some, the task is to automate the treasury, which is done significantly faster compared to an operating budget, right; for others, it's building consolidated reporting, which is, I don't know, even longer, even more complex, and that's already a BIT.Finance 350 job, right. Therefore, before calculating any specific payback , it’s probably worth discussing what functionality you actually need, who will be responsible for this project on your side, and what timeframes you would like to meet, both financial and calendar. Then we will be able to calculate some information for you. And I would also like to tell you once again about our clients, to whom we are certainly grateful, because we learn together with them while implementing the product. One of these companies is Impulse, located in Nizhny Novgorod,
+
+[1:04:29]
+with over 300 employees. At the start, there were about 25 workstations. By the end of the project, we had already crossed the 35-user mark. And the main advantages of the work were probably that we reduced costs for material supplies. That is, we are talking about something like 20-25%, because we started relying on the resource plan.
+
+[1:04:56]
+This is primarily supply chain and BIT.Finance, which we looked at earlier , and accounting transparency increased significantly. Well, the percentage, of course, is very approximate, it is our joint assessment with the client. That is, when we spoke with the customer at the end of the work and asked them to objectively evaluate our efforts, they felt that their accounting transparency had increased by about that much. Apart from this client, there are over 9,000 other companies in the country. In Nizhny, I think there are already over 300 companies. It's unlikely this information is relevant here. I think we've already approached the 300 mark.
+
+[1:05:33]
+Those who use BIT.Construction, those who use BIT.Finance—there are even more of them. I am personally acquainted with most of these clients and have worked with them directly, so I can share my experience if you have any questions regarding the operations of your specific structure or company.
+
+[1:05:51]
+And yes, how can we interact further? We could calculate the implementation cost for you, we could consult you, or conduct an individual demonstration of the program if any questions remain now and you would like to receive a separate answer to them. On that note, colleagues, my presentation is finished . I finished even faster than I expected, in almost an hour. I can answer some of your questions, if any remain. You can also use the chat for this purpose. I will gladly tell you what you need. They are asking how Bitfinance differs from Bitstroitelstvo . Bitfinance is a financial model; it primarily focuses on money accounting, tracking requests for cash expenditures , and managing project budgets in monetary terms. Bitstroitelstvo is a set of modules that allows for
+
+[1:06:52]
+automation—well, the contractor module automates accounting, and the supply and warehouse module automates operational warehouse accounting. I’ll probably open the database now, since we have a little time, so that I can show you—tell me, is the screen visible now? You should see the Accounting for Enterprise program. And excellent, that's great. So, answering Svetlana's question. There is a certain accounting shell, which is Accounting for Enterprise, from the main subsystem to the reference subsystem. It works standardly, like a regular 1C box. It has month-end closing and product groups through which we manage construction objects; everything seems fine, but sometimes the construction-specific functionality for a contracting enterprise is missing, which the Bitstroitelstvo Contractor block automates. Bitstroitelstvo is a
+
+[1:07:51]
+family of products that includes many blocks. Yes, each is used for a specific functional task. Yes, the contractor module is for automating work with completion certificates (KS), working with net invoicing, managing warranty retentions, setting up object-based accounting, generating M- 29 and M-19 forms, monitoring cost structures and financial results by object, and analyzing payments to customers and contractors. And the supply and warehouse subsystem, respectively, is for working with estimates, managing material requests, and so on, right? So, this is Bitstroitelstvo, which adds subsystems to Accounting for Enterprise.
+
+[1:08:31]
+Bitfinance is also a separate subsystem , but it is a standalone product, designed not just to automate specific construction industries, but as a universal product for managing an enterprise's financial activities. So, these are primarily treasury and budgeting blocks, right? They are two separate products, developed by our separate departments, but they can be consolidated into a single window. For this, there is a comprehensive product called Accounting for Enterprise plus Bitstroitelstvo plus Treasury and Budgeting. You see one common window here, which includes accounting, payroll, HR, warehouse, purchasing, and sales subsystems. There are subsystems for construction accounting, namely Contractor and Supply and Warehouse, which I talked about during the webinar , right? There is a subsystem for
+
+[1:09:19]
+treasury and budgeting accounting. So, this is all within a single window. The products, I repeat, differ in that budgeting and treasury—that is, BitFinance—can essentially automate not just the construction industry; it can automate financial management for any company. Contractor and Procurement are modules from the BitConstruction product family. Each unit is designed for a specific functional task. For instance, there is a transport unit for automating vehicles and machinery, right? And there is warehouse procurement for automating material accounting on-site, and a contractor subsystem for expanding accounting capabilities. That is how they are fundamentally different. Svetlana, did that answer your question? Or is there something else we should cover? Uh-huh.
+
+[1:10:14]
+Colleagues, do you perhaps have any other additional questions? We still have 5 minutes left. I can answer any specific practical questions you might have.
+
+[1:10:25]
+Colleagues, if there are no questions right now, or if they haven't been formulated yet, or if they arise after the webinar, you might want to look at the program from the inside. We have the capability for that. We can provide you with demo access along with a user manual. The demo access is granted for a period of, I believe, up to a month.
+
+[1:10:43]
+You can explore it on your own, get a feel for the product, ask practical questions if they come up during use, and then make a purchasing decision. If you need a professional demonstration tailored to your processes, or using the demo database, or to answer practical questions that come up later, I will be happy to help. I will gladly assist you. Please reach out; we would be happy to see you on our projects. I think it is time to wrap up. If anyone still has questions, Alla has provided our office contact details. I should probably have Alla repeat our phone number so you can ask our managers any questions. I will take my leave now, colleagues. Have a good day. All the best. Goodbye.
