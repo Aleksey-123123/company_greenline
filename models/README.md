@@ -92,7 +92,7 @@ python3 models/collect_plan.py --file data/receivables.example.csv
 
 Сравнивает стоимость коробки (Gectaro) и своей системы нарастающим итогом за
 12/24/36 месяцев, считает месяц окупаемости и ежемесячную стоимость после
-запуска. Разбор — `notes/0010`.
+запуска. Разбор — `notes/0022`.
 
 ```bash
 python3 models/system_tco.py --modules data/system_build.example.csv
