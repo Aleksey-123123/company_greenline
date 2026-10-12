@@ -88,6 +88,28 @@ python3 models/collect_plan.py --file data/receivables.example.csv
 
 ---
 
+## `system_tco.py` — купить коробку или сделать своё
+
+Сравнивает стоимость коробки (Gectaro) и своей системы нарастающим итогом за
+12/24/36 месяцев, считает месяц окупаемости и ежемесячную стоимость после
+запуска. Разбор — `notes/0010`.
+
+```bash
+python3 models/system_tco.py --modules data/system_build.example.csv
+python3 models/system_tco.py --modules data/system_build_lean.example.csv --office-sub 3000
+python3 models/system_tco.py --modules data/system_build.example.csv --box-monthly 56000 --rates 2000
+```
+
+`data/system_build*.example.csv` — модули и часы: `id, module, hours, in_gectaro`.
+Часы — **оценки ассистента**; замените оценкой исполнителя. `in_gectaro`:
+yes / partial / unknown — по отзывам с сайта Gectaro.
+
+Параметры: `--box-monthly`, `--box-setup`, `--rates` (сценарии ставки ₽/ч),
+`--support-hours` (ч/мес), `--hosting`, `--office-sub` (Битрикс24, ₽/мес),
+`--horizons`.
+
+---
+
 ## Демо-данные
 
 `data/*.example.csv` — **выдуманные** цифры для проверки работоспособности
