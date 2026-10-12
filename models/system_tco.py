@@ -3,11 +3,15 @@
 """
 Купить коробку (Gectaro) или сделать своё: сколько стоит каждый путь за N месяцев.
 
-Своё = часы разработки × ставка + поддержка в месяц × ставка + хостинг
-       (+ подписка Битрикс24, если офисный контур на нём).
-Коробка = абонентская плата × месяцы (+ разовое внедрение, если есть).
+Своё = часы разработки × ставка + (поддержка × ставка + хостинг + подписка
+       Битрикс24) за каждый месяц ПОСЛЕ запуска (--launch-months).
+Коробка = разовое внедрение + абонентская плата за каждый месяц, с ежегодной
+       индексацией цены (--box-index).
 
-Время сотрудников на ввод данных одинаково в обоих путях и не учитывается.
+Не учитывается (допущение): время сотрудников. Коробке нужно обучение, своей
+системе — постановка задачи директором; плюс у своей системы польза начинается
+на --launch-months позже. Скрипт печатает это отдельной строкой, в рублях не
+оценивает: размер пользы — нет данных (notes/0007 H15).
 
 Запуск:
     python3 models/system_tco.py --modules data/system_build.example.csv
@@ -47,13 +51,21 @@ def money(x: float) -> str:
     return f"{x:,.0f}".replace(",", " ")
 
 
+LAUNCH = 0   # месяцев до запуска своей системы, задаётся из аргументов
+INDEX = 0.0  # годовая индексация цены коробки, доля
+
+
 def own_cost(months: int, build_h: float, rate: float, support_h: float,
              hosting: float, office_sub: float) -> float:
-    return build_h * rate + months * (support_h * rate + hosting + office_sub)
+    running = max(0, months - LAUNCH)
+    return build_h * rate + running * (support_h * rate + hosting + office_sub)
 
 
 def box_cost(months: int, monthly: float, setup: float) -> float:
-    return setup + months * monthly
+    total = setup
+    for m in range(months):
+        total += monthly * (1 + INDEX) ** (m // 12)
+    return total
 
 
 def breakeven_month(build_h, rate, support_h, hosting, office_sub,
@@ -82,7 +94,18 @@ def main() -> int:
     ap.add_argument("--office-sub", type=float, default=0,
                     help="подписка офисного контура (Битрикс24), ₽/мес")
     ap.add_argument("--horizons", type=int, nargs="+", default=[12, 24, 36])
+    ap.add_argument("--launch-months", type=int, default=0,
+                    help="месяцев разработки до запуска своей системы")
+    ap.add_argument("--box-index", type=float, default=0.0,
+                    help="годовая индексация цены коробки, %%")
     a = ap.parse_args()
+    global LAUNCH, INDEX
+    if a.launch_months < 0 or a.box_index < 0:
+        print("ОШИБКА: --launch-months и --box-index не могут быть отрицательными",
+              file=sys.stderr)
+        return 1
+    LAUNCH = a.launch_months
+    INDEX = a.box_index / 100.0
 
     try:
         mods = load_modules(a.modules)
@@ -95,7 +118,9 @@ def main() -> int:
     for m in mods:
         print(f"  {m['id']}  {m['hours']:>5.0f} ч  [в коробке: {m['in_box'] or '?'}]  {m['module']}")
     print(f"  ИТОГО разработка: {build_h:.0f} ч; поддержка {a.support_hours:.0f} ч/мес; "
-          f"хостинг {money(a.hosting)} ₽/мес; офисная подписка {money(a.office_sub)} ₽/мес\n")
+          f"хостинг {money(a.hosting)} ₽/мес; офисная подписка {money(a.office_sub)} ₽/мес")
+    print(f"  Запуск своей через {a.launch_months} мес (всё это время пользы нет); "
+          f"индексация коробки {a.box_index:.0f} %/год\n")
 
     head = f"{'':<22}" + "".join(f"{f'{h} мес':>14}" for h in a.horizons) + f"{'окупаемость':>16}"
     print(head)
