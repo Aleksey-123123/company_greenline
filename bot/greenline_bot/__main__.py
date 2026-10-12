@@ -7,6 +7,7 @@ import logging
 import sys
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import SimpleEventIsolation
 from aiogram.fsm.storage.memory import MemoryStorage as FSMMemory
 
 from .config import ConfigError, load_config
@@ -16,7 +17,9 @@ from .storage import MemoryStorage, SheetsStorage
 
 def build_dispatcher(db, cfg, routers=routers) -> Dispatcher:
     """routers — параметр для тестов: роутер можно подключить только к одному диспетчеру."""
-    dp = Dispatcher(storage=FSMMemory(), db=db, cfg=cfg)
+    # SimpleEventIsolation: события одного пользователя — строго по очереди.
+    # Без этого двойное нажатие «Сохранить» успевает записать две строки.
+    dp = Dispatcher(storage=FSMMemory(), events_isolation=SimpleEventIsolation(), db=db, cfg=cfg)
     access = AccessMiddleware()
     dp.message.outer_middleware(access)
     dp.callback_query.outer_middleware(access)
@@ -32,6 +35,9 @@ async def main() -> int:
     except ConfigError as e:
         print(f"ОШИБКА настройки: {e}", file=sys.stderr)
         return 1
+    if cfg.archive_chat_id and not str(cfg.archive_chat_id).startswith("-100"):
+        logging.warning("ARCHIVE_CHAT_ID=%s не начинается с -100: ссылки на фото не откроются. "
+                        "Используйте закрытый канал (см. bot/README.md).", cfg.archive_chat_id)
     if cfg.storage == "sheets":
         db = SheetsStorage(cfg.sheet_id, cfg.google_credentials)
     else:

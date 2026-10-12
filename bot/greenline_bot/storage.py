@@ -1,19 +1,25 @@
 """Хранилище: схема листов таблицы и две реализации — в памяти и Google Таблица.
 
 Схема одна для обеих реализаций. Колонка «Битрикс ID» в листах с данными
-пока пустая: её заполнит синхронизация с Битрикс24 (notes/0023, этап 3).
+пока пустая: её заполнит связка с Битрикс24 (notes/0023, этап 3).
+
+Запись идёт по заголовкам листа, а не по номерам колонок: помощник может
+добавлять свои колонки в любом месте. Переименовывать колонки из SCHEMA нельзя.
 """
 
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from typing import Protocol
 
 from .domain import (DELIVERY_FULL, REQUEST_CLOSED_STATUSES, SiteObject, User,
-                     parse_bool, parse_object_list, safe_cell)
+                     parse_bool, parse_object_list)
 
-# Лист → заголовки колонок. Порядок колонок = порядок здесь.
+log = logging.getLogger(__name__)
+
+# Лист → обязательные колонки. В новом листе они создаются в этом порядке.
 SCHEMA: dict[str, list[str]] = {
     "Пользователи": ["Telegram ID", "ФИО", "Роль", "Объекты", "Активен",
                      "Username", "Добавлен", "Комментарий"],
@@ -35,25 +41,37 @@ SCHEMA: dict[str, list[str]] = {
 }
 
 
+class StorageUnavailable(Exception):
+    """Таблица недоступна или сломаны заголовки — показываем пользователю."""
+
+
 class Storage(Protocol):
     async def list_users(self) -> list[User]: ...
     async def list_objects(self) -> list[SiteObject]: ...
     async def add_pending_user(self, telegram_id: int, name: str, username: str,
                                added: str) -> None: ...
     async def append(self, sheet: str, row: dict) -> None: ...
+    async def exists(self, sheet: str, row_id: str) -> bool: ...
     async def open_requests(self, object_id: str) -> list[dict]: ...
     async def set_request_delivery(self, request_id: str, value: str) -> bool: ...
 
 
-def _row_values(sheet: str, row: dict) -> list:
+def check_row(sheet: str, row: dict) -> None:
     unknown = set(row) - set(SCHEMA[sheet])
     if unknown:
         raise KeyError(f"{sheet}: нет колонок {sorted(unknown)}")
-    out = []
-    for h in SCHEMA[sheet]:
-        v = row.get(h, "")
-        out.append(safe_cell(v) if isinstance(v, str) else v)
-    return out
+
+
+def align(headers: list[str], row: dict) -> list:
+    """Значения строки в порядке фактических заголовков листа.
+
+    Чужие колонки остаются пустыми. Нет обязательной колонки — ошибка: лучше
+    упасть, чем молча записать данные не туда.
+    """
+    missing = [h for h in row if h not in headers]
+    if missing:
+        raise StorageUnavailable(f"в листе нет колонок {missing} — их переименовали или удалили")
+    return [row.get(h, "") for h in headers]
 
 
 def _user_from_record(r: dict) -> User | None:
@@ -116,8 +134,11 @@ class MemoryStorage:
                                            "Username": username, "Добавлен": added})
 
     async def append(self, sheet: str, row: dict) -> None:
-        values = _row_values(sheet, row)
-        self.sheets[sheet].append(dict(zip(SCHEMA[sheet], values)))
+        check_row(sheet, row)
+        self.sheets[sheet].append(dict(zip(SCHEMA[sheet], align(SCHEMA[sheet], row))))
+
+    async def exists(self, sheet: str, row_id: str) -> bool:
+        return any(r.get("ID") == row_id for r in self.sheets[sheet])
 
     async def open_requests(self, object_id: str) -> list[dict]:
         return [r for r in self.sheets["Заявки"] if _is_open_request(r, object_id)]
@@ -136,7 +157,8 @@ class SheetsStorage:
     """gspread синхронный — вызовы уходят в поток, чтобы не блокировать бота.
 
     Пользователи и объекты кэшируются на CACHE_SECONDS: помощник правит таблицу
-    руками, изменения подхватываются в течение минуты.
+    руками, изменения подхватываются в течение минуты. Если Google недоступен,
+    отдаём последний удачный кэш — бот продолжает пускать людей.
     """
 
     CACHE_SECONDS = 60
@@ -159,11 +181,26 @@ class SheetsStorage:
         return self._sheet(name).get_all_records(expected_headers=SCHEMA[name],
                                                  default_blank="")
 
+    async def _call(self, fn, *args, **kwargs):
+        try:
+            return await asyncio.to_thread(fn, *args, **kwargs)
+        except StorageUnavailable:
+            raise
+        except Exception as e:
+            log.exception("Google Таблица: ошибка")
+            raise StorageUnavailable(str(e)) from e
+
     async def _cached(self, name: str) -> list[dict]:
         hit = self._cache.get(name)
         if hit and time.monotonic() - hit[0] < self.CACHE_SECONDS:
             return hit[1]
-        records = await asyncio.to_thread(self._records, name)
+        try:
+            records = await self._call(self._records, name)
+        except StorageUnavailable:
+            if hit:
+                log.warning("«%s»: таблица недоступна, отдаю устаревший кэш", name)
+                return hit[1]
+            raise
         self._cache[name] = (time.monotonic(), records)
         return records
 
@@ -175,31 +212,44 @@ class SheetsStorage:
 
     async def add_pending_user(self, telegram_id, name, username, added) -> None:
         async with self._lock:
-            self._cache.pop("Пользователи", None)
-            records = await asyncio.to_thread(self._records, "Пользователи")
+            records = await self._call(self._records, "Пользователи")
             if any(str(r.get("Telegram ID")) == str(telegram_id) for r in records):
                 return
             await self.append("Пользователи", {"Telegram ID": telegram_id, "ФИО": name,
                                                "Активен": "нет", "Username": username,
                                                "Добавлен": added})
 
-    async def append(self, sheet: str, row: dict) -> None:
-        values = _row_values(sheet, row)
+    def _append_sync(self, sheet: str, row: dict) -> None:
+        ws = self._sheet(sheet)
+        values = align(ws.row_values(1), row)
         # RAW: текст не превращается в формулы и даты, числа остаются числами.
-        await asyncio.to_thread(self._sheet(sheet).append_row, values,
-                                value_input_option="RAW")
+        ws.append_row(values, value_input_option="RAW")
+
+    async def append(self, sheet: str, row: dict) -> None:
+        check_row(sheet, row)
+        await self._call(self._append_sync, sheet, row)
         self._cache.pop(sheet, None)
 
+    def _find_sync(self, sheet: str, row_id: str):
+        ws = self._sheet(sheet)
+        headers = ws.row_values(1)
+        cell = ws.find(row_id, in_column=headers.index("ID") + 1)
+        return ws, headers, cell
+
+    async def exists(self, sheet: str, row_id: str) -> bool:
+        _, _, cell = await self._call(self._find_sync, sheet, row_id)
+        return cell is not None
+
     async def open_requests(self, object_id: str) -> list[dict]:
-        records = await asyncio.to_thread(self._records, "Заявки")
+        records = await self._call(self._records, "Заявки")
         return [r for r in records if _is_open_request(r, object_id)]
 
-    async def set_request_delivery(self, request_id: str, value: str) -> bool:
-        ws = self._sheet("Заявки")
-        id_col = SCHEMA["Заявки"].index("ID") + 1
-        col = SCHEMA["Заявки"].index("Поставка") + 1
-        cell = await asyncio.to_thread(ws.find, request_id, in_column=id_col)
+    def _set_delivery_sync(self, request_id: str, value: str) -> bool:
+        ws, headers, cell = self._find_sync("Заявки", request_id)
         if cell is None:
             return False
-        await asyncio.to_thread(ws.update_cell, cell.row, col, value)
+        ws.update_cell(cell.row, headers.index("Поставка") + 1, value)
         return True
+
+    async def set_request_delivery(self, request_id: str, value: str) -> bool:
+        return await self._call(self._set_delivery_sync, request_id, value)

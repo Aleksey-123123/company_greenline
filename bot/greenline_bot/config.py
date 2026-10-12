@@ -34,16 +34,22 @@ class ConfigError(Exception):
     pass
 
 
-def load_config(env_file: Path | None = None) -> Config:
-    _load_dotenv(env_file or Path(__file__).resolve().parent.parent / ".env")
+BOT_DIR = Path(__file__).resolve().parent.parent
+
+
+def load_config(env_file: Path | None = None, require_token: bool = True) -> Config:
+    """require_token=False — для setup_sheet: таблицу можно подготовить до бота."""
+    _load_dotenv(env_file or BOT_DIR / ".env")
     token = os.environ.get("BOT_TOKEN", "").strip()
-    if not token:
+    if require_token and not token:
         raise ConfigError("BOT_TOKEN не задан (см. bot/.env.example)")
     storage = os.environ.get("STORAGE", "sheets").strip().lower()
     if storage not in {"sheets", "memory"}:
         raise ConfigError("STORAGE должен быть sheets или memory")
     sheet_id = os.environ.get("SHEET_ID", "").strip()
     creds = os.environ.get("GOOGLE_CREDENTIALS", "").strip()
+    if creds and not Path(creds).is_absolute():
+        creds = str(BOT_DIR / creds)          # относительный путь — от папки bot/
     if storage == "sheets" and not (sheet_id and creds):
         raise ConfigError("Для STORAGE=sheets нужны SHEET_ID и GOOGLE_CREDENTIALS")
     archive = os.environ.get("ARCHIVE_CHAT_ID", "").strip()

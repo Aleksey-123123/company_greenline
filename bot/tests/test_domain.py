@@ -3,8 +3,7 @@ from datetime import date, datetime
 
 from greenline_bot.domain import (InputError, SiteObject, User, archive_link, new_id,
                                   objects_for, parse_due_date, parse_machinery,
-                                  parse_object_list, parse_people, safe_cell,
-                                  users_to_notify)
+                                  parse_object_list, parse_people, users_to_notify)
 
 OBJS = [SiteObject("О-01", "Мост"), SiteObject("О-02", "Стена"),
         SiteObject("О-03", "Закрыт", active=False)]
@@ -61,11 +60,17 @@ class Parsing(unittest.TestCase):
         self.assertEqual(total, 9.0)
         self.assertEqual(len(items), 2)
 
+    def test_machinery_more_forms(self):
+        self.assertEqual(parse_machinery("экскаватор 8 ч и кран 4 ч")[1], 12.0)
+        self.assertEqual(parse_machinery("экскаватор 8\nкран 4")[1], 12.0)
+        self.assertEqual(parse_machinery("экскаватор - 8, экскаватор - 8")[1], 16.0)
+
     def test_machinery_errors(self):
-        with self.assertRaises(InputError):
-            parse_machinery("экскаватор весь день")
-        with self.assertRaises(InputError):
-            parse_machinery("кран 30")
+        # Всё, что разбирается не целиком, — переспрос, а не заниженная цифра.
+        for bad in ["экскаватор весь день", "кран 30", "экскаватор 8ч кран 4ч",
+                    "2 экскаватора по 8 ч", "экскаватор и кран 8", "8 часов"]:
+            with self.assertRaises(InputError, msg=bad):
+                parse_machinery(bad)
 
     def test_due_date(self):
         today = date(2026, 10, 12)
@@ -77,10 +82,9 @@ class Parsing(unittest.TestCase):
                 parse_due_date(bad, today)
 
     def test_misc(self):
-        self.assertTrue(new_id("ЗК", datetime(2026, 10, 12, 14, 32)).startswith("ЗК-261012-1432-"))
+        rid = new_id("ЗК", datetime(2026, 10, 12, 14, 32))
+        self.assertTrue(rid.startswith("ЗК-261012-1432-") and len(rid) == len("ЗК-261012-1432-") + 6)
         self.assertEqual(archive_link(-1001234567, 42), "https://t.me/c/1234567/42")
-        self.assertEqual(safe_cell("=HYPERLINK(1)"), "'=HYPERLINK(1)")
-        self.assertEqual(safe_cell("- цемент"), "- цемент")
 
 
 if __name__ == "__main__":

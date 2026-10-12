@@ -22,12 +22,17 @@ ALL_OBJECTS_ROLES = {"директор", "помощник", "снабжение
 NOTIFY_REQUEST_ROLES = {"директор", "помощник", "снабжение", "рп"}
 # Кому приходит уведомление о проблеме / допработе / «ждём от заказчика».
 NOTIFY_NOTE_ROLES = {"директор", "помощник", "рп"}
+# Кто отправляет данные по объекту. Остальные роли только получают уведомления
+# и сообщают об ошибках в боте.
+SENDER_ROLES = {"прораб", "бригадир", "рп", "директор", "помощник"}
 
 TRUE_WORDS = {"да", "yes", "y", "1", "true", "+", "активен", "вкл"}
 ALL_WORDS = {"все", "всё", "all", "*"}
 
-# Списки значений — те же, что в Битриксе (notes/0020, шаг 3.3), чтобы потом
-# перенос шёл один в один.
+# Тип заявки и «Поставка» — те же значения, что поля смарт-процесса «Заявки на
+# закуп» (notes/0020, шаг 3.3); статус «Новая» — его первая стадия (шаг 3.2).
+# Типы записей — под шаблоны задач «Допработа» и «Ждём от заказчика» (0020,
+# правки 2 и 5).
 REQUEST_TYPES = ["материал", "подрядчик", "техника", "прочее"]
 NOTE_TYPES = ["проблема", "допработа", "ждём от заказчика", "замечание", "прочее"]
 NOTIFY_NOTE_TYPES = {"проблема", "допработа", "ждём от заказчика"}
@@ -111,28 +116,38 @@ def parse_people(text: str) -> int:
     return n
 
 
-_MACHINE_RE = re.compile(r"([^\d,;\n]+?)\s*[-–—:]?\s*(\d+(?:[.,]\d+)?)\s*(?:ч|час[а-я]*|м/?ч)?\.?(?=\s*(?:[,;\n]|$))",
-                         re.IGNORECASE)
+# Одна позиция: «название [-:] часы [ч|час…]», затем разделитель «,» «;» «и» или конец.
+_MACHINE_ITEM = re.compile(
+    r"\s*([^\d,;\n]+?)\s*[-–—:]?\s*(\d+(?:[.,]\d+)?)\s*(?:ч\.?|час[а-я]*|м/?ч\.?)?"
+    r"\s*(?:[,;\n]|\sи\s|$)", re.IGNORECASE)
+_AMBIGUOUS_NAME = re.compile(r"(^|\s)(и|по|х|x)(\s|$)", re.IGNORECASE)
 
 
 def parse_machinery(text: str) -> tuple[list[tuple[str, float]], float]:
     """«экскаватор 8, кран 4,5 ч» → ([('экскаватор', 8.0), ('кран', 4.5)], 12.5).
 
-    «нет» → ([], 0). Если часы не найдены ни у одной позиции — ошибка: тогда
-    экономист не сможет посчитать машино-часы.
+    «нет» → ([], 0). Строка должна разбираться ЦЕЛИКОМ: если хоть кусок не
+    распознан («2 экскаватора по 8 ч», «экскаватор 8ч кран 4ч» без запятой) —
+    ошибка и переспрос. Иначе в «Машино-часы» молча уйдёт заниженная цифра.
     """
     t = (text or "").strip()
     if t.lower() in NO_WORDS:
         return [], 0.0
-    items = []
-    for m in _MACHINE_RE.finditer(t):
+    hint = ("Не понял часы. Пишите через запятую: «экскаватор 8, кран 4». "
+            "Две одинаковые машины — отдельно: «экскаватор 8, экскаватор 8». "
+            "Если техники не было — «нет».")
+    items, pos = [], 0
+    while pos < len(t):
+        m = _MACHINE_ITEM.match(t, pos)
+        if not m or m.end() == pos:
+            raise InputError(hint)
         name = m.group(1).strip(" ,;-–—:")
-        hours = float(m.group(2).replace(",", "."))
-        if name:
-            items.append((name, hours))
+        if not name or _AMBIGUOUS_NAME.search(name):
+            raise InputError(hint)
+        items.append((name, float(m.group(2).replace(",", "."))))
+        pos = m.end()
     if not items:
-        raise InputError("Не понял часы. Пример: «экскаватор 8, кран 4». "
-                         "Если техники не было — «нет».")
+        raise InputError(hint)
     if any(h > 24 for _, h in items):
         raise InputError("Больше 24 часов на одну единицу за день? Проверьте.")
     return items, round(sum(h for _, h in items), 2)
@@ -155,16 +170,18 @@ def parse_due_date(text: str, today: date) -> date:
                 result = date(today.year + 1, mth, d)
     except ValueError:
         raise InputError("Такой даты нет. Пример: 15.10")
-    if result < today:
-        raise InputError("Дата в прошлом. Укажите будущую дату.")
-    if result > today + timedelta(days=366):
-        raise InputError("Больше года вперёд? Проверьте дату.")
+    if not due_date_ok(result, today):
+        raise InputError("Дата в прошлом или больше года вперёд. Проверьте.")
     return result
 
 
 def new_id(prefix: str, now: datetime) -> str:
-    """Короткий читаемый ID: «З-261012-1432-a7»."""
-    return f"{prefix}-{now:%y%m%d-%H%M}-{secrets.token_hex(1)}"
+    """Короткий читаемый ID: «ЗК-261012-1432-a7f3c1»."""
+    return f"{prefix}-{now:%y%m%d-%H%M}-{secrets.token_hex(3)}"
+
+
+def due_date_ok(value: date, today: date) -> bool:
+    return today <= value <= today + timedelta(days=366)
 
 
 def archive_link(chat_id: int, message_id: int) -> str:
@@ -172,13 +189,3 @@ def archive_link(chat_id: int, message_id: int) -> str:
     s = str(chat_id)
     internal = s[4:] if s.startswith("-100") else s.lstrip("-")
     return f"https://t.me/c/{internal}/{message_id}"
-
-
-def safe_cell(text: str) -> str:
-    """Защита от формул при выгрузке таблицы в CSV/Excel: «=…», «+…», «@…» экранируем.
-
-    В саму Google Таблицу пишем в режиме RAW, там формулы и так не выполняются.
-    """
-    if text and text[0] in "=+@":
-        return "'" + text
-    return text

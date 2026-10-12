@@ -17,7 +17,9 @@ EXAMPLE_OBJECTS = [["О-01", "Пример: мост через р. Иня", "Н
 
 def main() -> int:
     try:
-        cfg = load_config()
+        cfg = load_config(require_token=False)
+        if cfg.storage != "sheets":
+            raise ConfigError("в .env должно быть STORAGE=sheets")
     except ConfigError as e:
         print(f"ОШИБКА настройки: {e}", file=sys.stderr)
         return 1
