@@ -472,23 +472,25 @@ async def report_crew(message: Message, state: FSMContext, bot: Bot, cfg: Config
         return
     await state.update_data(crew="" if text == kb.BTN_SKIP else text)
     await state.set_state(Report.machinery)
-    await message.answer("Техника и часы через запятую. Пример: «экскаватор 8, кран 4».\n"
-                         "Если техники не было — «Нет».", reply_markup=kb.step(kb.BTN_NO))
+    await message.answer("Техника: часы или рейсы и цена, каждая машина с новой строки или через "
+                         "запятую. Пример:\n«Экскаватор 9 ч по 3500\nКаток 10 ч по 3500\n"
+                         "Хово 5 рейсов по 10000».\nЦену можно не писать. Если техники не было — «Нет».",
+                         reply_markup=kb.step(kb.BTN_NO))
 
 
 @router.message(Report.machinery)
 async def report_machinery(message: Message, state: FSMContext) -> None:
     if not message.text:
-        await message.answer("Технику и часы — текстом, чтобы посчитать машино-часы. "
-                             "Пример: «экскаватор 8, кран 4».")
+        await message.answer("Технику — текстом, чтобы посчитать часы и деньги. "
+                             "Пример: «Экскаватор 9 ч по 3500».")
         return
     try:
-        items, total = parse_machinery(message.text)
+        rep = parse_machinery(message.text)
     except InputError as e:
         await message.answer(str(e))
         return
-    raw = ", ".join(f"{n} {h:g}" for n, h in items)
-    await state.update_data(machinery=raw, machine_hours=total)
+    await state.update_data(machinery=str(rep), machine_hours=rep.hours,
+                            trips=rep.trips, machine_cost=rep.cost)
     await state.set_state(Report.done)
     await message.answer("Что сделано за день? Можно голосом.", reply_markup=kb.step())
 
@@ -530,7 +532,8 @@ async def report_photos_done(message: Message, state: FSMContext, cfg: Config) -
                        f"📋 Отчёт · {d['obj_name']}\n"
                        f"Людей: {d['people']}\n"
                        f"Бригада: {d['crew'] or '—'}\n"
-                       f"Техника: {d['machinery'] or 'нет'} (всего {d['machine_hours']:g} маш.-ч)\n"
+                       f"Техника: {d['machinery'] or 'нет'}\n"
+                       f"  итого {d['machine_hours']:g} маш.-ч, {d['trips']:g} рейсов, {d['machine_cost']:g} ₽\n"
                        f"Сделано: {d['done']}\n"
                        f"Проблемы: {d['problems'] or 'нет'}\n"
                        f"Фото: {len(d['files'])}")
@@ -547,7 +550,8 @@ async def report_save(call: CallbackQuery, state: FSMContext, db: Storage, cfg: 
            "Время": now.strftime("%H:%M"), "Объект ID": d["obj_id"], "Объект": d["obj_name"],
            "Автор ID": user.telegram_id, "Автор": user.name, "Роль": user.role,
            "Людей": d["people"], "Бригада / подрядчик": d["crew"],
-           "Техника (как написано)": d["machinery"], "Машино-часы": d["machine_hours"],
+           "Техника": d["machinery"], "Машино-часы": d["machine_hours"],
+           "Рейсы": d["trips"], "Техника, ₽": d["machine_cost"],
            "Сделано": d["done"], "Проблемы": d["problems"], "Фото, шт": len(d["files"]),
            "Фото (ссылки)": _links(d["files"]), "Файлы (file_id)": _file_ids(d["files"])}
     if not await _save(call, state, db, "Отчёты", row):

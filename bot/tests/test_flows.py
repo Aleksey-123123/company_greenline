@@ -125,7 +125,7 @@ class Flows(unittest.TestCase):
             await h.send(FOREMAN, "шесть")                    # ошибка ввода — переспросит
             await h.send(FOREMAN, "6")
             await h.send(FOREMAN, "ООО Бетон")
-            await h.send(FOREMAN, "экскаватор 8, кран 4")
+            await h.send(FOREMAN, "Экскаватор 8 ч по 3000\nХово 2 рейса по 9000")
             await h.voice(FOREMAN)                            # «сделано» голосом
             await h.send(FOREMAN, "Ждём арматуру, простой 2 ч")
             await h.photo(FOREMAN)
@@ -137,8 +137,9 @@ class Flows(unittest.TestCase):
         rows = h.db.sheets["Отчёты"]
         self.assertEqual(len(rows), 1)
         r = rows[0]
-        self.assertEqual((r["Объект ID"], r["Людей"], r["Машино-часы"], r["Фото, шт"]), ("О-02", 6, 12.0, 2))
-        self.assertEqual(r["Техника (как написано)"], "экскаватор 8, кран 4")
+        self.assertEqual((r["Объект ID"], r["Людей"], r["Машино-часы"], r["Рейсы"], r["Техника, ₽"], r["Фото, шт"]),
+                         ("О-02", 6, 8.0, 2.0, 42000.0, 2))
+        self.assertEqual(r["Техника"], "Экскаватор: 8 ч × 3000 = 24000 ₽; Хово: 2 рейс × 9000 = 18000 ₽")
         self.assertTrue(r["Сделано"].startswith("🎤 голосовое: https://t.me/c/9999/"))
         self.assertEqual(len(r["Фото (ссылки)"].splitlines()), 2)
         self.assertIn("Напишите число людей", "\n".join(h.session.texts_to(FOREMAN)))
@@ -337,7 +338,7 @@ class Flows(unittest.TestCase):
             await h.send(FOREMAN, "экскаватор 8ч кран 4ч")
             return h
         h = run(go())
-        self.assertTrue(any("Пишите через запятую" in t for t in h.session.texts_to(FOREMAN)))
+        self.assertTrue(any("каждую машину" in t for t in h.session.texts_to(FOREMAN)))
 
     def test_supply_cannot_send_reports_but_gets_notified(self):
         async def go():

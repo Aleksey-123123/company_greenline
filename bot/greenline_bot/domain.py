@@ -116,41 +116,119 @@ def parse_people(text: str) -> int:
     return n
 
 
-# Одна позиция: «название [-:] часы [ч|час…]», затем разделитель «,» «;» «и» или конец.
-_MACHINE_ITEM = re.compile(
-    r"\s*([^\d,;\n]+?)\s*[-–—:]?\s*(\d+(?:[.,]\d+)?)\s*(?:ч\.?|час[а-я]*|м/?ч\.?)?"
-    r"\s*(?:[,;\n]|\sи\s|$)", re.IGNORECASE)
-_AMBIGUOUS_NAME = re.compile(r"(^|\s)(и|по|х|x)(\s|$)", re.IGNORECASE)
+# ── Техника ───────────────────────────────────────────────────────────────────
+# Форматы взяты из реального рабочего чата прораба (notes/0024): он пишет так,
+# и бот должен это принимать, а не переучивать человека.
+#   «Экскаватор погрузчик 9,5 часов по 3500 = 33250»
+#   «4 часа гидромолот по 4000» · «Каток 10 часов 35000» · «5 хово по 10000»
+#   «Хово 1 рейс 13000» · «Экскаватор погрузчик 3500х8=28000» · «экскаватор 8, кран 4»
+
+_NUM = r"\d+(?:[.,]\d+)?"
+_UNIT = r"(?:час(?:а|ов)?|рейс(?:а|ов)?|м/?ч|ч\.?)(?![а-яё])"   # длинные формы раньше «ч»
+_RATE = rf"(?:(?:по|х|x|\*|×)\s*(?P<rate>{_NUM}))"
+_SUM = rf"(?:=?\s*(?P<sum>{_NUM}))"
+# A: «название кол-во [ед.] [доп. название] [по ставке] [= сумма]»
+_ITEM_A = re.compile(rf"^(?P<name>[^\d=]+?)\s*[-–—:]?\s*(?P<qty>{_NUM})\s*(?P<unit>{_UNIT})?"
+                     rf"(?:\s+(?!(?:по|х|x)\s)(?P<name2>[^\d=]+?))??\s*{_RATE}?\s*{_SUM}?$", re.IGNORECASE)
+# B: «кол-во [ед.] название [по ставке] [= сумма]»
+_ITEM_B = re.compile(rf"^(?P<qty>{_NUM})\s*(?P<unit>{_UNIT})?\s*(?P<name>[^\d=]+?)"
+                     rf"\s*{_RATE}?\s*{_SUM}?$", re.IGNORECASE)
+_SPLIT = re.compile(r"\n|;|,(?=\s*\D)|\s+и\s+", re.IGNORECASE)
+_PAY_WORDS = re.compile(r"\s*(?:нал(?:ичка|ичные)?|наличкой|б/?н|безнал|руб\.?|р\.?|₽)\s*\.?\s*$", re.IGNORECASE)
+_TRIP_NAMES = re.compile(r"хово|howo|камаз|самосвал|шахман|рейс", re.IGNORECASE)
+_BAD_NAME = re.compile(r"(^|\s)(и|по|х|x)(\s|$)|^(час\w*|рейс\w*|ч)$", re.IGNORECASE)
 
 
-def parse_machinery(text: str) -> tuple[list[tuple[str, float]], float]:
-    """«экскаватор 8, кран 4,5 ч» → ([('экскаватор', 8.0), ('кран', 4.5)], 12.5).
+@dataclass
+class Machine:
+    name: str
+    qty: float            # часы или рейсы
+    unit: str             # «ч» или «рейс»
+    rate: float | None    # ₽ за час / рейс
+    cost: float | None    # ₽ за день, если известно
 
-    «нет» → ([], 0). Строка должна разбираться ЦЕЛИКОМ: если хоть кусок не
-    распознан («2 экскаватора по 8 ч», «экскаватор 8ч кран 4ч» без запятой) —
-    ошибка и переспрос. Иначе в «Машино-часы» молча уйдёт заниженная цифра.
+    def __str__(self) -> str:
+        s = f"{self.name}: {self.qty:g} {self.unit}"
+        if self.rate:
+            s += f" × {self.rate:g}"
+        if self.cost is not None:
+            s += f" = {self.cost:g} ₽"
+        return s
+
+
+@dataclass
+class MachineryReport:
+    items: list[Machine]
+
+    @property
+    def hours(self) -> float:
+        return round(sum(m.qty for m in self.items if m.unit == "ч"), 2)
+
+    @property
+    def trips(self) -> float:
+        return round(sum(m.qty for m in self.items if m.unit == "рейс"), 2)
+
+    @property
+    def cost(self) -> float:
+        return round(sum(m.cost or 0 for m in self.items), 2)
+
+    def __str__(self) -> str:
+        return "; ".join(map(str, self.items))
+
+
+def _num(x: str | None) -> float | None:
+    return float(x.replace(",", ".")) if x else None
+
+
+MACHINERY_HINT = ("Не понял. Пишите каждую машину через запятую или с новой строки:\n"
+                  "«Экскаватор 9 ч по 3500, Каток 10 ч по 3500, Хово 5 рейсов по 10000».\n"
+                  "Если техники не было — «нет».")
+
+
+def parse_machinery(text: str) -> MachineryReport:
+    """Строка о технике → позиции с часами/рейсами и деньгами.
+
+    Строка должна разбираться ЦЕЛИКОМ, иначе — ошибка и переспрос: молча
+    записать заниженные машино-часы хуже, чем переспросить. Сумма, не
+    совпавшая с «часы × ставка», принимается, только если это итог всех
+    позиций выше (прораб часто пишет «= 37000» в конце двух строк).
     """
     t = (text or "").strip()
     if t.lower() in NO_WORDS:
-        return [], 0.0
-    hint = ("Не понял часы. Пишите через запятую: «экскаватор 8, кран 4». "
-            "Две одинаковые машины — отдельно: «экскаватор 8, экскаватор 8». "
-            "Если техники не было — «нет».")
-    items, pos = [], 0
-    while pos < len(t):
-        m = _MACHINE_ITEM.match(t, pos)
-        if not m or m.end() == pos:
-            raise InputError(hint)
-        name = m.group(1).strip(" ,;-–—:")
-        if not name or _AMBIGUOUS_NAME.search(name):
-            raise InputError(hint)
-        items.append((name, float(m.group(2).replace(",", "."))))
-        pos = m.end()
+        return MachineryReport([])
+    items: list[Machine] = []
+    for raw in _SPLIT.split(t):
+        seg = _PAY_WORDS.sub("", raw.strip(" .,"))
+        if not seg:
+            continue
+        m = _ITEM_A.match(seg) or _ITEM_B.match(seg)
+        if not m:
+            raise InputError(MACHINERY_HINT)
+        name = " ".join(filter(None, [m.group("name").strip(" -–—:"),
+                                      (m.groupdict().get("name2") or "").strip()]))
+        if not name or _BAD_NAME.search(name):
+            raise InputError(MACHINERY_HINT)
+        qty, rate, total = _num(m.group("qty")), _num(m.group("rate")), _num(m.group("sum"))
+        unit_raw = (m.group("unit") or "").lower()
+        unit = "рейс" if unit_raw.startswith("рейс") or (not unit_raw and _TRIP_NAMES.search(name)) else "ч"
+        if rate is not None and qty > rate:          # «3500х8» — ставка и часы наоборот
+            qty, rate = rate, qty
+        if unit == "рейс" and not unit_raw and rate is None and total is None and qty >= 1000:
+            qty, total = 1, qty                      # «КамАЗ 11000» — один рейс за 11000
+        limit = 24 if unit == "ч" else 50
+        if qty <= 0 or qty > limit:
+            raise InputError(f"«{seg}»: {qty:g} {unit} за день? Напишите количество и цену, "
+                             f"например «{name} 8 ч по 3500».")
+        cost = qty * rate if rate is not None else total
+        if rate is not None and total is not None and abs(qty * rate - total) > 1:
+            running = sum(i.cost or 0 for i in items) + qty * rate
+            if abs(running - total) > 1:
+                raise InputError(f"«{seg}»: {qty:g} × {rate:g} = {qty * rate:g}, а написано {total:g}. "
+                                 "Проверьте.")
+        items.append(Machine(name, qty, unit, rate, round(cost, 2) if cost is not None else None))
     if not items:
-        raise InputError(hint)
-    if any(h > 24 for _, h in items):
-        raise InputError("Больше 24 часов на одну единицу за день? Проверьте.")
-    return items, round(sum(h for _, h in items), 2)
+        raise InputError(MACHINERY_HINT)
+    return MachineryReport(items)
 
 
 def parse_due_date(text: str, today: date) -> date:

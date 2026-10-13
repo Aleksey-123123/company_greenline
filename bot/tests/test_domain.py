@@ -51,24 +51,46 @@ class Parsing(unittest.TestCase):
             with self.assertRaises(InputError):
                 parse_people(bad)
 
-    def test_machinery(self):
-        items, total = parse_machinery("экскаватор 8, кран 4,5 ч")
-        self.assertEqual(items, [("экскаватор", 8.0), ("кран", 4.5)])
-        self.assertEqual(total, 12.5)
-        self.assertEqual(parse_machinery("Нет"), ([], 0.0))
-        items, total = parse_machinery("КамАЗ-самосвал: 6 часов; манипулятор 3")
-        self.assertEqual(total, 9.0)
-        self.assertEqual(len(items), 2)
+    def test_machinery_simple(self):
+        r = parse_machinery("экскаватор 8, кран 4,5 ч")
+        self.assertEqual([(m.name, m.qty, m.unit) for m in r.items],
+                         [("экскаватор", 8.0, "ч"), ("кран", 4.5, "ч")])
+        self.assertEqual((r.hours, r.trips, r.cost), (12.5, 0, 0))
+        self.assertEqual(parse_machinery("Нет").items, [])
+        self.assertEqual(parse_machinery("экскаватор 8 ч и кран 4 ч").hours, 12.0)
+        self.assertEqual(parse_machinery("КамАЗ-самосвал: 6 часов; манипулятор 3").hours, 9.0)
 
-    def test_machinery_more_forms(self):
-        self.assertEqual(parse_machinery("экскаватор 8 ч и кран 4 ч")[1], 12.0)
-        self.assertEqual(parse_machinery("экскаватор 8\nкран 4")[1], 12.0)
-        self.assertEqual(parse_machinery("экскаватор - 8, экскаватор - 8")[1], 16.0)
+    def test_machinery_real_chat_formats(self):
+        # Форматы из рабочего чата прораба (notes/0024), числа изменены.
+        cases = {
+            "Экскаватор погрузчик 9,5 часов по 3000 = 28500": (9.5, 0, 28500),
+            "4 часа гидромолот по 4000\n5 часов ковш по 3000": (9, 0, 31000),
+            "Каток 10 часов 30000": (10, 0, 30000),
+            "5 хово по 9000 безнал": (0, 5, 45000),
+            "Хово 1 рейс 12000": (0, 1, 12000),
+            "Экскаватор погрузчик 3000х8=24000": (8, 0, 24000),
+            "КамАЗ 10000 нал": (0, 1, 10000),
+            # «= итог» в конце двух строк: 4×4000 + 6×3000 = 34000
+            "Экскаватор погрузчик 4 часа гидромолот по 4000\n6 часов ковш по 3000 = 34000": (10, 0, 34000),
+        }
+        for text, (h, t, c) in cases.items():
+            r = parse_machinery(text)
+            self.assertEqual((r.hours, r.trips, r.cost), (h, t, c), msg=text)
+
+    def test_hint_example_parses(self):
+        # Пример, который бот показывает прорабу, обязан разбираться.
+        import re
+        from greenline_bot.domain import MACHINERY_HINT
+        example = re.search(r"«(.+?)»", MACHINERY_HINT).group(1)
+        r = parse_machinery(example)
+        self.assertEqual((r.hours, r.trips), (19.0, 5.0))
 
     def test_machinery_errors(self):
-        # Всё, что разбирается не целиком, — переспрос, а не заниженная цифра.
+        # Всё, что разбирается не целиком или не сходится, — переспрос, а не тихая ошибка.
         for bad in ["экскаватор весь день", "кран 30", "экскаватор 8ч кран 4ч",
-                    "2 экскаватора по 8 ч", "экскаватор и кран 8", "8 часов"]:
+                    "2 экскаватора по 8 ч", "экскаватор и кран 8", "8 часов",
+                    "10,5 по 3500= 36750", "Каток 10 часов по 3500 = 30000",
+                    "Хово с 29.9 по 4.10 424000 р.", "экскаватор 31500"]:
             with self.assertRaises(InputError, msg=bad):
                 parse_machinery(bad)
 
