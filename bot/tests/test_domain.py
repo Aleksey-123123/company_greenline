@@ -43,6 +43,44 @@ class Access(unittest.TestCase):
         self.assertEqual([u.telegram_id for u in got], [2])
 
 
+class Money(unittest.TestCase):
+    def test_amount_real_chat_lines(self):
+        from greenline_bot.domain import parse_amount
+        a = parse_amount("Заборная сетка 75 метров 9900 нал")
+        self.assertEqual((a.what, a.amount, a.method, a.unpaid), ("Заборная сетка 75 метров", 9900, "наличные", False))
+        a = parse_amount("12000 люди нал. ( не оплатил)")
+        self.assertEqual((a.what, a.amount, a.method, a.unpaid), ("люди", 12000, "наличные", True))
+        a = parse_amount("Цемент 2 034,50 б/н")
+        self.assertEqual((a.amount, a.method), (2034.5, "безнал"))
+        for bad in ["сетка", "Сетка 75 м", "9900"]:
+            with self.assertRaises(InputError, msg=bad):
+                parse_amount(bad)
+
+    def test_money_and_quantity(self):
+        from greenline_bot.domain import parse_money, parse_quantity
+        self.assertEqual([parse_money(x) for x in ["50000", "50 000", "50к", "50000₽"]], [50000.0] * 4)
+        self.assertEqual(parse_quantity("82,6 т"), (82.6, "т"))
+        self.assertEqual(parse_quantity("40 мешков"), (40.0, "мешок"))
+        self.assertEqual(parse_quantity("12 м3"), (12.0, "м³"))
+        self.assertEqual(parse_quantity("35,95т."), (35.95, "т"))
+        with self.assertRaises(InputError):
+            parse_quantity("много")
+
+    def test_balance_counts_only_paid_cash(self):
+        from greenline_bot.domain import cash_balance
+        issued = [{"Кому ID": 1, "Сумма": 50000}, {"Кому ID": 2, "Сумма": 9999}]
+        exp = [{"Автор ID": 1, "Сумма": 9900, "Способ оплаты": "наличные", "Оплачено": "да"},
+               {"Автор ID": 1, "Сумма": 12000, "Способ оплаты": "наличные", "Оплачено": "нет"},
+               {"Автор ID": 1, "Сумма": 5000, "Способ оплаты": "безнал", "Оплачено": "да"}]
+        self.assertEqual(cash_balance(1, issued, exp), 40100)
+
+    def test_sheet_url(self):
+        from greenline_bot.config import sheet_id_from
+        url = "https://docs.google.com/spreadsheets/d/1AbC-d_9/edit#gid=0"
+        self.assertEqual(sheet_id_from(url), "1AbC-d_9")
+        self.assertEqual(sheet_id_from("1AbC-d_9"), "1AbC-d_9")
+
+
 class Parsing(unittest.TestCase):
     def test_people(self):
         self.assertEqual(parse_people("6"), 6)

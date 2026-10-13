@@ -25,6 +25,18 @@ NOTIFY_NOTE_ROLES = {"директор", "помощник", "рп"}
 # Кто отправляет данные по объекту. Остальные роли только получают уведомления
 # и сообщают об ошибках в боте.
 SENDER_ROLES = {"прораб", "бригадир", "рп", "директор", "помощник"}
+# Счёт на оплату может приложить и снабжение.
+INVOICE_ROLES = SENDER_ROLES | {"снабжение"}
+# Выдают наличные под отчёт.
+CASH_ISSUER_ROLES = {"директор", "помощник", "бухгалтер"}
+# Кому выдают под отчёт (список в кнопках).
+CASH_RECEIVER_ROLES = {"прораб", "бригадир", "рп", "снабжение", "помощник"}
+# Счета: согласует директор, оплачивает бухгалтер или директор.
+APPROVE_ROLES = {"директор"}
+PAY_ROLES = {"директор", "бухгалтер"}
+NOTIFY_INVOICE_ROLES = {"директор", "помощник", "бухгалтер"}
+# Кто создаёт ссылки-приглашения.
+INVITE_ROLES = {"директор", "помощник"}
 
 TRUE_WORDS = {"да", "yes", "y", "1", "true", "+", "активен", "вкл"}
 ALL_WORDS = {"все", "всё", "all", "*"}
@@ -37,6 +49,10 @@ REQUEST_TYPES = ["материал", "подрядчик", "техника", "п
 NOTE_TYPES = ["проблема", "допработа", "ждём от заказчика", "замечание", "прочее"]
 NOTIFY_NOTE_TYPES = {"проблема", "допработа", "ждём от заказчика"}
 # Статусы заявки = стадии смарт-процесса «Заявки на закуп» (notes/0010 §4).
+EXPENSE_ARTICLES = ["люди", "техника", "материал", "услуга", "доставка", "прочее"]
+PAY_METHODS = ["наличные", "безнал", "карта"]
+INVOICE_NEW, INVOICE_APPROVED, INVOICE_PAID, INVOICE_REJECTED = (
+    "на согласовании", "согласован", "оплачен", "отклонён")
 REQUEST_STATUS_NEW = "Новая"
 REQUEST_CLOSED_STATUSES = {"закрыто", "отклонено"}
 DELIVERY_FULL = "получено"
@@ -229,6 +245,125 @@ def parse_machinery(text: str) -> MachineryReport:
     if not items:
         raise InputError(MACHINERY_HINT)
     return MachineryReport(items)
+
+
+# ── Деньги и количество ───────────────────────────────────────────────────────
+
+_PAY_DETECT = [("наличные", re.compile(r"\bнал\w*|\bналичк\w*", re.IGNORECASE)),
+               ("безнал", re.compile(r"безнал\w*|\bб/?н\b", re.IGNORECASE)),
+               ("карта", re.compile(r"\bкарт\w*", re.IGNORECASE))]
+_AMOUNT_TAIL = re.compile(r"(?:=\s*)?(\d[\d\s]*(?:[.,]\d{1,2})?)\s*(?:₽|р\.?|руб\.?)?\s*$", re.IGNORECASE)
+_AMOUNT_HEAD = re.compile(r"^(\d[\d\s]*(?:[.,]\d{1,2})?)\s*(?:₽|р\.?|руб\.?)?\s+(\D.*)$", re.IGNORECASE)
+_UNPAID = re.compile(r"\(?\s*не\s*опла[тч]\w*\s*\)?", re.IGNORECASE)
+
+
+@dataclass
+class Amount:
+    what: str
+    amount: float
+    method: str | None       # распознанный способ оплаты, если был в тексте
+    unpaid: bool             # «(не оплатил)» в тексте
+
+
+def parse_amount(text: str) -> Amount:
+    """«Заборная сетка 75 м 9900 нал» → что «Заборная сетка 75 м», 9900, наличные.
+
+    Сумма — последнее число в строке (так пишет прораб). Слова «нал», «бн»,
+    «карта», «(не оплатил)» распознаются и убираются из описания.
+    """
+    t = " ".join((text or "").split())
+    unpaid = bool(_UNPAID.search(t))
+    t = _UNPAID.sub(" ", t)
+    method = None
+    for name, rx in _PAY_DETECT:
+        if rx.search(t):
+            method = name
+            t = rx.sub(" ", t)
+            break
+    t = " ".join(t.split()).strip(" .,-—")
+    m = _AMOUNT_TAIL.search(t)
+    if m:
+        amount_raw, what = m.group(1), t[:m.start()]
+    else:                                   # «12000 люди» — сумма в начале
+        h = _AMOUNT_HEAD.match(t)
+        if not h:
+            raise InputError("Не нашёл сумму. Пишите так: «Заборная сетка 75 м — 9900 нал».")
+        amount_raw, what = h.group(1), h.group(2)
+    amount = float(amount_raw.replace(" ", "").replace(",", "."))
+    what = what.strip(" .,-—=:")
+    if not what:
+        raise InputError("Напишите, за что: «Чистка колодца 4600».")
+    if amount <= 0 or amount > 10_000_000:
+        raise InputError("Проверьте сумму.")
+    return Amount(what, amount, method, unpaid)
+
+
+def parse_money(text: str) -> float:
+    """Только сумма: «50000», «50 000», «50000₽», «50к»."""
+    t = (text or "").strip().lower().replace(" ", "").replace("₽", "").replace("руб", "").rstrip(".р")
+    mult = 1000 if t.endswith(("к", "k", "т")) else 1
+    t = t.rstrip("кkт")
+    try:
+        v = float(t.replace(",", ".")) * mult
+    except ValueError:
+        raise InputError("Напишите сумму числом: 50000")
+    if v <= 0 or v > 10_000_000:
+        raise InputError("Проверьте сумму.")
+    return v
+
+
+_QTY = re.compile(r"^\s*(\d+(?:[.,]\d+)?)\s*(т|тонн\w*|м3|м³|куб\w*|шт\w*|м|метр\w*|кг|л|меш\w*|рул\w*|пал\w*)\.?\s*$",
+                  re.IGNORECASE)
+# Длинные префиксы раньше коротких: «меш» и «метр» до «м».
+_UNIT_NORM = [("т", "т"), ("м3", "м³"), ("м³", "м³"), ("куб", "м³"), ("шт", "шт"), ("меш", "мешок"),
+              ("метр", "м"), ("м", "м"), ("кг", "кг"), ("л", "л"), ("рул", "рулон"), ("пал", "поддон")]
+
+
+def parse_quantity(text: str) -> tuple[float, str]:
+    """«82,6 т» → (82.6, 'т'); «40 мешков» → (40.0, 'мешок')."""
+    m = _QTY.match(text or "")
+    if not m:
+        raise InputError("Напишите количество и единицу: «82,6 т», «12 м³», «40 мешков».")
+    raw = m.group(2).lower()
+    if raw.startswith("тонн"):
+        raw = "т"
+    unit = next(norm for pre, norm in _UNIT_NORM if raw.startswith(pre))
+    return float(m.group(1).replace(",", ".")), unit
+
+
+def cash_balance(user_id: int, issued: list[dict], expenses: list[dict]) -> float:
+    """Остаток подотчёта: выдано человеку − потрачено им наличными и оплачено."""
+    got = sum(_f(r.get("Сумма")) for r in issued if str(r.get("Кому ID")) == str(user_id))
+    spent = sum(_f(r.get("Сумма")) for r in expenses
+                if str(r.get("Автор ID")) == str(user_id)
+                and str(r.get("Способ оплаты", "")).lower() == "наличные"
+                and str(r.get("Оплачено", "")).lower() == "да")
+    return round(got - spent, 2)
+
+
+def _f(v) -> float:
+    try:
+        return float(str(v).replace(" ", "").replace(",", ".") or 0)
+    except ValueError:
+        return 0.0
+
+
+def accumulated(rows: list[dict], object_id: str, what: str, unit: str, request_id: str = "") -> float:
+    """Накопительно по материалу на объекте: по заявке, если есть, иначе по названию."""
+    key = what.strip().lower()
+    total = 0.0
+    for r in rows:
+        if str(r.get("Объект ID")) != object_id or str(r.get("Ед.", "")) != unit:
+            continue
+        same = (str(r.get("Заявка ID")) == request_id) if request_id else \
+            str(r.get("Что принято", "")).strip().lower() == key
+        if same:
+            total += _f(r.get("Количество"))
+    return round(total, 3)
+
+
+def money(v: float) -> str:
+    return f"{v:,.0f}".replace(",", " ") + " ₽"
 
 
 def parse_due_date(text: str, today: date) -> date:

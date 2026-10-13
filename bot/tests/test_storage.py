@@ -37,9 +37,11 @@ class Memory(unittest.TestCase):
             run(db.append("Заявки", {"ID": rid, "Объект ID": obj, "Статус": status,
                                      "Поставка": delivery}))
         self.assertEqual([r["ID"] for r in run(db.open_requests("О-01"))], ["ЗК-1", "ЗК-4"])
-        self.assertTrue(run(db.set_request_delivery("ЗК-4", "получено")))
+        self.assertTrue(run(db.update("Заявки", "ID", "ЗК-4", {"Поставка": "получено"})))
         self.assertEqual([r["ID"] for r in run(db.open_requests("О-01"))], ["ЗК-1"])
-        self.assertFalse(run(db.set_request_delivery("нет", "получено")))
+        self.assertFalse(run(db.update("Заявки", "ID", "нет", {"Поставка": "получено"})))
+        with self.assertRaises(KeyError):
+            run(db.update("Заявки", "ID", "ЗК-1", {"Нет колонки": 1}))
 
     def test_text_stored_as_is(self):
         # В таблицу пишем RAW: формулы не выполняются, апостроф не нужен.

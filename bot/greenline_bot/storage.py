@@ -33,8 +33,18 @@ SCHEMA: dict[str, list[str]] = {
                "Файлы (file_id)", "Статус", "Поставка", "Битрикс ID",
                "Комментарий офиса"],
     "Приёмка": ["ID", "Дата", "Объект ID", "Объект", "Автор ID", "Автор",
-                "Заявка ID", "Что принято", "Полностью / частично", "Комментарий",
-                "Фото (ссылки)", "Файлы (file_id)", "Битрикс ID"],
+                "Заявка ID", "Что принято", "Количество", "Ед.", "Полностью / частично",
+                "Комментарий", "Фото (ссылки)", "Файлы (file_id)", "Битрикс ID"],
+    "Расходы": ["ID", "Дата", "Объект ID", "Объект", "Автор ID", "Автор", "Роль",
+                "Статья", "Что", "Сумма", "Способ оплаты", "Оплачено", "Фото (ссылки)",
+                "Файлы (file_id)", "Битрикс ID"],
+    "Подотчёт": ["ID", "Дата", "Кому ID", "Кому", "Объект ID", "Объект", "Сумма",
+                 "На что", "Выдал ID", "Выдал"],
+    "Счета": ["ID", "Создан", "Объект ID", "Объект", "Автор ID", "Автор", "За что",
+              "Сумма", "Файлы (ссылки)", "Файлы (file_id)", "Статус", "Согласовал",
+              "Оплатил", "Дата оплаты", "Битрикс ID", "Комментарий офиса"],
+    "Приглашения": ["Код", "Роль", "Объекты", "Создал ID", "Создал", "Создано",
+                    "Использовал ID", "Использовал", "Использовано"],
     "Записи": ["ID", "Дата", "Объект ID", "Объект", "Автор ID", "Автор", "Роль",
                "Тип", "Текст", "Фото (ссылки)", "Файлы (file_id)", "Битрикс ID"],
     "Ошибки": ["ID", "Дата", "Автор ID", "Автор", "Текст", "Статус"],
@@ -52,8 +62,9 @@ class Storage(Protocol):
                                added: str) -> None: ...
     async def append(self, sheet: str, row: dict) -> None: ...
     async def exists(self, sheet: str, row_id: str) -> bool: ...
+    async def rows(self, sheet: str) -> list[dict]: ...
+    async def update(self, sheet: str, key_col: str, key, fields: dict) -> bool: ...
     async def open_requests(self, object_id: str) -> list[dict]: ...
-    async def set_request_delivery(self, request_id: str, value: str) -> bool: ...
 
 
 def check_row(sheet: str, row: dict) -> None:
@@ -140,15 +151,19 @@ class MemoryStorage:
     async def exists(self, sheet: str, row_id: str) -> bool:
         return any(r.get("ID") == row_id for r in self.sheets[sheet])
 
-    async def open_requests(self, object_id: str) -> list[dict]:
-        return [r for r in self.sheets["Заявки"] if _is_open_request(r, object_id)]
+    async def rows(self, sheet: str) -> list[dict]:
+        return list(self.sheets[sheet])
 
-    async def set_request_delivery(self, request_id: str, value: str) -> bool:
-        for r in self.sheets["Заявки"]:
-            if r.get("ID") == request_id:
-                r["Поставка"] = value
+    async def update(self, sheet: str, key_col: str, key, fields: dict) -> bool:
+        check_row(sheet, fields)
+        for r in self.sheets[sheet]:
+            if str(r.get(key_col)) == str(key):
+                r.update(fields)
                 return True
         return False
+
+    async def open_requests(self, object_id: str) -> list[dict]:
+        return [r for r in self.sheets["Заявки"] if _is_open_request(r, object_id)]
 
 
 # ── Google Таблица ────────────────────────────────────────────────────────────
@@ -230,26 +245,34 @@ class SheetsStorage:
         await self._call(self._append_sync, sheet, row)
         self._cache.pop(sheet, None)
 
-    def _find_sync(self, sheet: str, row_id: str):
+    def _find_sync(self, sheet: str, key, key_col: str = "ID"):
         ws = self._sheet(sheet)
         headers = ws.row_values(1)
-        cell = ws.find(row_id, in_column=headers.index("ID") + 1)
+        cell = ws.find(str(key), in_column=headers.index(key_col) + 1)
         return ws, headers, cell
 
     async def exists(self, sheet: str, row_id: str) -> bool:
         _, _, cell = await self._call(self._find_sync, sheet, row_id)
         return cell is not None
 
+    async def rows(self, sheet: str) -> list[dict]:
+        return await self._call(self._records, sheet)
+
+    def _update_sync(self, sheet: str, key_col: str, key, fields: dict) -> bool:
+        ws, headers, cell = self._find_sync(sheet, key, key_col)
+        if cell is None:
+            return False
+        align(headers, fields)               # проверка, что колонки есть
+        for name, value in fields.items():
+            ws.update_cell(cell.row, headers.index(name) + 1, value)
+        return True
+
+    async def update(self, sheet: str, key_col: str, key, fields: dict) -> bool:
+        check_row(sheet, fields)
+        ok = await self._call(self._update_sync, sheet, key_col, key, fields)
+        self._cache.pop(sheet, None)
+        return ok
+
     async def open_requests(self, object_id: str) -> list[dict]:
         records = await self._call(self._records, "Заявки")
         return [r for r in records if _is_open_request(r, object_id)]
-
-    def _set_delivery_sync(self, request_id: str, value: str) -> bool:
-        ws, headers, cell = self._find_sync("Заявки", request_id)
-        if cell is None:
-            return False
-        ws.update_cell(cell.row, headers.index("Поставка") + 1, value)
-        return True
-
-    async def set_request_delivery(self, request_id: str, value: str) -> bool:
-        return await self._call(self._set_delivery_sync, request_id, value)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -34,6 +35,13 @@ class ConfigError(Exception):
     pass
 
 
+def sheet_id_from(value: str) -> str:
+    """ID таблицы из полного адреса: можно вставить ссылку из браузера как есть."""
+    value = value.strip()
+    m = re.search(r"/spreadsheets/d/([A-Za-z0-9_-]+)", value)
+    return m.group(1) if m else value
+
+
 BOT_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -46,7 +54,7 @@ def load_config(env_file: Path | None = None, require_token: bool = True) -> Con
     storage = os.environ.get("STORAGE", "sheets").strip().lower()
     if storage not in {"sheets", "memory"}:
         raise ConfigError("STORAGE должен быть sheets или memory")
-    sheet_id = os.environ.get("SHEET_ID", "").strip()
+    sheet_id = sheet_id_from(os.environ.get("SHEET_ID", ""))
     creds = os.environ.get("GOOGLE_CREDENTIALS", "").strip()
     if creds and not Path(creds).is_absolute():
         creds = str(BOT_DIR / creds)          # относительный путь — от папки bot/

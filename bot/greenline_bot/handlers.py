@@ -33,11 +33,16 @@ from aiogram.types import CallbackQuery, Message, TelegramObject
 
 from . import keyboards as kb
 from .config import Config
-from .domain import (DELIVERY_FULL, DELIVERY_PART, NOTE_TYPES, NOTIFY_NOTE_ROLES,
-                     NOTIFY_NOTE_TYPES, NOTIFY_REQUEST_ROLES, REQUEST_STATUS_NEW,
-                     REQUEST_TYPES, ROLES, SENDER_ROLES, InputError, User,
-                     archive_link, due_date_ok, new_id, objects_for, parse_due_date,
-                     parse_machinery, parse_people, users_to_notify)
+from .domain import (ALL_OBJECTS_ROLES, APPROVE_ROLES, CASH_ISSUER_ROLES,
+                     CASH_RECEIVER_ROLES, DELIVERY_FULL, DELIVERY_PART, EXPENSE_ARTICLES,
+                     INVITE_ROLES, INVOICE_APPROVED, INVOICE_NEW, INVOICE_PAID,
+                     INVOICE_REJECTED, INVOICE_ROLES, NOTE_TYPES, NOTIFY_INVOICE_ROLES,
+                     NOTIFY_NOTE_ROLES, NOTIFY_NOTE_TYPES, NOTIFY_REQUEST_ROLES, PAY_METHODS,
+                     PAY_ROLES, REQUEST_STATUS_NEW, REQUEST_TYPES, ROLES, SENDER_ROLES,
+                     InputError, User, accumulated, archive_link, cash_balance, due_date_ok,
+                     money, new_id, objects_for, parse_amount, parse_due_date,
+                     parse_machinery, parse_money, parse_people, parse_quantity,
+                     users_to_notify)
 from .storage import Storage, StorageUnavailable
 
 log = logging.getLogger(__name__)
@@ -85,6 +90,7 @@ class Accept(StatesGroup):
     request = State()
     what = State()
     full = State()
+    qty = State()
     comment = State()
     photos = State()
     confirm = State()
@@ -99,6 +105,34 @@ class Note(StatesGroup):
 
 class Bug(StatesGroup):
     text = State()
+
+
+class Expense(StatesGroup):
+    article = State()
+    what = State()
+    method = State()
+    paid = State()
+    photos = State()
+    confirm = State()
+
+
+class Cash(StatesGroup):
+    who = State()
+    amount = State()
+    obj = State()
+    purpose = State()
+    confirm = State()
+
+
+class Invoice(StatesGroup):
+    file = State()
+    what = State()
+    confirm = State()
+
+
+class Invite(StatesGroup):
+    role = State()
+    objects = State()
 
 
 # ── Доступ ────────────────────────────────────────────────────────────────────
@@ -130,7 +164,14 @@ class AccessMiddleware(BaseMiddleware):
             user = next((u for u in users if u.telegram_id == tg_user.id), None)
             if user and user.active and user.role in ROLES:
                 data["user"] = user
+                kb.CURRENT_ROLE.set(user.role)
                 return await handler(event, data)
+            invite = _invite_code(event)
+            if invite:
+                text = await _accept_invite(invite, tg_user, user, db, cfg, data["bot"])
+                if msg is not None:
+                    await msg.answer(text, reply_markup=kb.main_menu(kb.CURRENT_ROLE.get()))
+                return None
             if user is None:
                 name = " ".join(filter(None, [tg_user.first_name, tg_user.last_name])) or str(tg_user.id)
                 await db.add_pending_user(tg_user.id, name, tg_user.username or "",
@@ -360,9 +401,9 @@ async def cb_drop(call: CallbackQuery, state: FSMContext) -> None:
 # ── Выбор объекта ─────────────────────────────────────────────────────────────
 
 async def _start_flow(message: Message, state: FSMContext, db: Storage, user: User,
-                      flow: str) -> None:
+                      flow: str, roles: set[str] = SENDER_ROLES, obj_id: str | None = None) -> None:
     await state.clear()
-    if not _can_send(user):
+    if user.role not in roles:
         await message.answer("Отправлять данные по объектам могут прорабы, РП, директор и помощник. "
                              f"Если это ошибка — напишите помощнику или нажмите «{kb.BTN_BUG}».",
                              reply_markup=kb.main_menu())
@@ -378,9 +419,11 @@ async def _start_flow(message: Message, state: FSMContext, db: Storage, user: Us
         return
     nonce = secrets.token_hex(3)
     await state.update_data(flow=flow, nonce=nonce, objects=[(o.id, o.name) for o in objs], files=[])
-    if len(objs) == 1:
-        await state.update_data(obj_id=objs[0].id, obj_name=objs[0].name)
-        await message.answer(f"Объект: {objs[0].name}")
+    preset = next((o for o in objs if o.id == obj_id), None)
+    if preset or len(objs) == 1:
+        o = preset or objs[0]
+        await state.update_data(obj_id=o.id, obj_name=o.name)
+        await message.answer(f"Объект: {o.name}")
         await _after_object(message, state, db)
         return
     await state.set_state(Flow.obj)
@@ -418,6 +461,14 @@ async def _after_object(message: Message, state: FSMContext, db: Storage) -> Non
             [(t.capitalize(), _cb("rt", nonce, str(i))) for i, t in enumerate(REQUEST_TYPES)], per_row=2))
     elif flow == "accept":
         await _ask_accept_request(message, state, db)
+    elif flow == "expense":
+        await state.set_state(Expense.article)
+        await message.answer("На что расход?", reply_markup=kb.step())
+        await message.answer("Статья:", reply_markup=kb.inline(
+            [(t.capitalize(), _cb("ea", nonce, str(i))) for i, t in enumerate(EXPENSE_ARTICLES)], per_row=3))
+    elif flow == "invoice":
+        await state.set_state(Invoice.file)
+        await message.answer("Пришлите счёт: PDF, фото или скриншот.", reply_markup=kb.step())
     elif flow == "note":
         await state.set_state(Note.ntype)
         await message.answer("О чём запись?", reply_markup=kb.step())
@@ -780,9 +831,25 @@ async def accept_full(call: CallbackQuery, state: FSMContext) -> None:
     full = payload == "1"
     await _close_buttons(call, "Полностью" if full else "Частично")
     await state.update_data(full=full)
+    await state.set_state(Accept.qty)
+    await call.message.answer("Сколько привезли? «82,6 т», «12 м³», «40 мешков». "
+                              "Бот посчитает накопительный итог.", reply_markup=kb.step(kb.BTN_SKIP))
+
+
+@router.message(Accept.qty, F.text)
+async def accept_qty(message: Message, state: FSMContext) -> None:
+    if message.text == kb.BTN_SKIP:
+        await state.update_data(qty="", unit="")
+    else:
+        try:
+            qty, unit = parse_quantity(message.text)
+        except InputError as e:
+            await message.answer(str(e))
+            return
+        await state.update_data(qty=qty, unit=unit)
     await state.set_state(Accept.comment)
-    await call.message.answer("Комментарий: брак, недовоз, пересорт? Если нет — «Нет».",
-                              reply_markup=kb.step(kb.BTN_NO))
+    await message.answer("Комментарий: брак, недовоз, пересорт? Если нет — «Нет».",
+                         reply_markup=kb.step(kb.BTN_NO))
 
 
 @router.message(Accept.comment)
@@ -806,10 +873,12 @@ async def accept_photo(message: Message, state: FSMContext, bot: Bot, cfg: Confi
 async def accept_photos_done(message: Message, state: FSMContext, cfg: Config) -> None:
     d = await state.get_data()
     await state.set_state(Accept.confirm)
+    qty_txt = f"{d['qty']:g} {d['unit']}" if d["qty"] != "" else "—"
     await _ask_confirm(message, state, cfg, "ПР",
                        f"✅ Приёмка · {d['obj_name']}\n"
                        f"Заявка: {d['req_id'] or 'без заявки'}\n"
                        f"Что: {d['what']}\n"
+                       f"Количество: {qty_txt}\n"
                        f"{'Полностью' if d['full'] else 'Частично'}\n"
                        f"Комментарий: {d['comment'] or '—'}\n"
                        f"Фото: {len(d['files'])}")
@@ -825,14 +894,21 @@ async def accept_save(call: CallbackQuery, state: FSMContext, db: Storage, cfg: 
     row = {"ID": d["row_id"], "Дата": _now(cfg).strftime("%Y-%m-%d %H:%M"),
            "Объект ID": d["obj_id"], "Объект": d["obj_name"], "Автор ID": user.telegram_id,
            "Автор": user.name, "Заявка ID": d["req_id"], "Что принято": d["what"],
-           "Полностью / частично": delivery, "Комментарий": d["comment"],
+           "Количество": d["qty"], "Ед.": d["unit"], "Полностью / частично": delivery, "Комментарий": d["comment"],
            "Фото (ссылки)": _links(d["files"]), "Файлы (file_id)": _file_ids(d["files"])}
     if not await _save(call, state, db, "Приёмка", row):
         return
-    await _finish(call, state, f"Приёмка сохранена ({row['ID']}).")
+    total_line = ""
+    if d["qty"] != "":
+        try:
+            total = accumulated(await db.rows("Приёмка"), d["obj_id"], d["what"], d["unit"], d["req_id"])
+            total_line = f"\nНакопительно по «{d['what'][:40]}»: {total:g} {d['unit']}"
+        except StorageUnavailable:
+            pass
+    await _finish(call, state, f"Приёмка сохранена ({row['ID']}).{total_line}")
     if d["req_id"]:
         try:
-            await db.set_request_delivery(d["req_id"], delivery)
+            await db.update("Заявки", "ID", d["req_id"], {"Поставка": delivery})
         except Exception:
             log.exception("не обновлена поставка в заявке %s", d["req_id"])
     users = await _users_or_empty(db)
@@ -934,8 +1010,551 @@ async def bug_text(message: Message, state: FSMContext, db: Storage, cfg: Config
         await message.answer("Не получилось сохранить — попробуйте ещё раз через минуту.")
         return
     await _to_menu(message, state, "Спасибо! Записали, исправим.")
-    for tid in cfg.admin_ids:
-        await _send(bot, tid, f"🐞 {user.name}: {text}")
+    await _notify_admins(bot, cfg, await _users_or_empty(db), f"🐞 {user.name}: {text}")
+
+
+# ── Расход ────────────────────────────────────────────────────────────────────
+# Вечерний столбик прораба: «Люди 12000 нал», «Заборная сетка 75 м 9900 нал».
+
+@menu.message(F.text == kb.BTN_EXPENSE)
+async def expense_start(message: Message, state: FSMContext, db: Storage, user: User) -> None:
+    await _start_flow(message, state, db, user, "expense")
+
+
+@menu.callback_query(F.data.startswith("exp_more:"))
+async def expense_more(call: CallbackQuery, state: FSMContext, db: Storage, user: User) -> None:
+    """«➕ Ещё расход» — сразу следующий расход по тому же объекту."""
+    await _close_buttons(call)
+    await _start_flow(call.message, state, db, user, "expense", obj_id=call.data.split(":", 1)[1])
+
+
+@router.callback_query(Expense.article, F.data.startswith("ea:"))
+async def expense_article(call: CallbackQuery, state: FSMContext) -> None:
+    payload = await _arg(call, state)
+    article = _pick(EXPENSE_ARTICLES, payload) if payload is not None else None
+    if article is None:
+        return
+    await _close_buttons(call, f"Статья: {article}")
+    await state.update_data(article=article)
+    await state.set_state(Expense.what)
+    await call.message.answer("Что и сколько стоит? Одной строкой, как в чате:\n"
+                              "«Заборная сетка 75 м 9900 нал», «Люди 12000 нал (не оплатил)».",
+                              reply_markup=kb.step())
+
+
+@router.message(Expense.what, F.text)
+async def expense_what(message: Message, state: FSMContext) -> None:
+    try:
+        a = parse_amount(message.text)
+    except InputError as e:
+        await message.answer(str(e))
+        return
+    await state.update_data(what=a.what, amount=a.amount, method=a.method or "",
+                            paid=None if not a.unpaid else False)
+    if not a.method:
+        await _ask_method(message, state)
+    elif a.unpaid:
+        await _ask_expense_photos(message, state)
+    else:
+        await _ask_paid(message, state)
+
+
+async def _ask_method(message: Message, state: FSMContext) -> None:
+    await state.set_state(Expense.method)
+    nonce = (await state.get_data())["nonce"]
+    await message.answer("Как платили?", reply_markup=kb.inline(
+        [(m.capitalize(), _cb("em", nonce, str(i))) for i, m in enumerate(PAY_METHODS)], per_row=3))
+
+
+async def _ask_paid(message: Message, state: FSMContext) -> None:
+    await state.set_state(Expense.paid)
+    nonce = (await state.get_data())["nonce"]
+    await message.answer("Уже оплачено?", reply_markup=kb.inline(
+        [("Оплачено", _cb("ep", nonce, "1")), ("Долг, не оплачено", _cb("ep", nonce, "0"))], per_row=2))
+
+
+async def _ask_expense_photos(message: Message, state: FSMContext) -> None:
+    await state.set_state(Expense.photos)
+    await message.answer("Фото чека или накладной, затем «Готово».", reply_markup=kb.step(kb.BTN_NO_PHOTO))
+
+
+@router.callback_query(Expense.method, F.data.startswith("em:"))
+async def expense_method(call: CallbackQuery, state: FSMContext) -> None:
+    payload = await _arg(call, state)
+    method = _pick(PAY_METHODS, payload) if payload is not None else None
+    if method is None:
+        return
+    await _close_buttons(call, f"Оплата: {method}")
+    await state.update_data(method=method)
+    if (await state.get_data()).get("paid") is False:
+        await _ask_expense_photos(call.message, state)
+    else:
+        await _ask_paid(call.message, state)
+
+
+@router.callback_query(Expense.paid, F.data.startswith("ep:"))
+async def expense_paid(call: CallbackQuery, state: FSMContext) -> None:
+    payload = await _arg(call, state)
+    if payload not in {"0", "1"}:
+        return
+    await _close_buttons(call, "Оплачено" if payload == "1" else "Долг, не оплачено")
+    await state.update_data(paid=payload == "1")
+    await _ask_expense_photos(call.message, state)
+
+
+@router.message(Expense.photos, MEDIA)
+async def expense_photo(message: Message, state: FSMContext, bot: Bot, cfg: Config, user: User) -> None:
+    await _collect_media(message, state, bot, cfg, user)
+
+
+@router.message(Expense.photos, F.text.in_({kb.BTN_DONE, kb.BTN_NO_PHOTO}))
+async def expense_photos_done(message: Message, state: FSMContext, cfg: Config) -> None:
+    d = await state.get_data()
+    await state.set_state(Expense.confirm)
+    await _ask_confirm(message, state, cfg, "РС",
+                       f"💸 Расход · {d['obj_name']}\n"
+                       f"Статья: {d['article']}\n"
+                       f"Что: {d['what']}\n"
+                       f"Сумма: {money(d['amount'])}, {d['method']}\n"
+                       f"{'Оплачено' if d['paid'] else 'Долг, не оплачено'}\n"
+                       f"Фото: {len(d['files'])}")
+
+
+@router.callback_query(Expense.confirm, F.data.startswith("save:"))
+async def expense_save(call: CallbackQuery, state: FSMContext, db: Storage, cfg: Config,
+                       user: User) -> None:
+    if await _arg(call, state) is None:
+        return
+    d = await state.get_data()
+    row = {"ID": d["row_id"], "Дата": _now(cfg).strftime("%Y-%m-%d %H:%M"),
+           "Объект ID": d["obj_id"], "Объект": d["obj_name"], "Автор ID": user.telegram_id,
+           "Автор": user.name, "Роль": user.role, "Статья": d["article"], "Что": d["what"],
+           "Сумма": d["amount"], "Способ оплаты": d["method"], "Оплачено": "да" if d["paid"] else "нет",
+           "Фото (ссылки)": _links(d["files"]), "Файлы (file_id)": _file_ids(d["files"])}
+    if not await _save(call, state, db, "Расходы", row):
+        return
+    balance = ""
+    if d["method"] == "наличные" and d["paid"]:
+        balance = await _balance_line(db, user.telegram_id)
+    await state.clear()
+    await _close_buttons(call)
+    await call.message.answer(f"Расход сохранён ({row['ID']}).{balance}", reply_markup=kb.main_menu())
+    await call.message.answer("Ещё расход по этому объекту?", reply_markup=kb.inline(
+        [("➕ Ещё расход", f"exp_more:{d['obj_id']}")]))
+
+
+async def _balance_line(db: Storage, user_id: int) -> str:
+    try:
+        b = cash_balance(user_id, await db.rows("Подотчёт"), await db.rows("Расходы"))
+    except StorageUnavailable:
+        return ""
+    return f"\nОстаток подотчёта: {money(b)}" + (" — перерасход" if b < 0 else "")
+
+
+# ── Подотчёт: выдал деньги и остаток ──────────────────────────────────────────
+
+@menu.message(F.text == kb.BTN_BALANCE)
+@menu.message(Command("balance"))
+async def balance(message: Message, db: Storage, user: User) -> None:
+    """Свой остаток; директору, помощнику и бухгалтеру — остатки всех."""
+    try:
+        issued, expenses, users = await db.rows("Подотчёт"), await db.rows("Расходы"), await db.list_users()
+    except StorageUnavailable:
+        await message.answer(UNAVAILABLE)
+        return
+    if user.role in CASH_ISSUER_ROLES:
+        lines = []
+        for u in users:
+            if u.active and u.role in CASH_RECEIVER_ROLES:
+                b = cash_balance(u.telegram_id, issued, expenses)
+                if b:
+                    lines.append(f"{u.name}: {money(b)}")
+        text = "Остатки подотчёта:\n" + ("\n".join(lines) if lines else "ни у кого нет")
+    else:
+        text = f"Ваш остаток подотчёта: {money(cash_balance(user.telegram_id, issued, expenses))}"
+    await message.answer(text, reply_markup=kb.main_menu())
+
+
+@menu.message(F.text == kb.BTN_CASH)
+async def cash_start(message: Message, state: FSMContext, db: Storage, user: User) -> None:
+    await state.clear()
+    if user.role not in CASH_ISSUER_ROLES:
+        await message.answer("Выдачу денег записывают директор, помощник и бухгалтер.",
+                             reply_markup=kb.main_menu())
+        return
+    try:
+        people = [u for u in await db.list_users()
+                  if u.active and u.role in CASH_RECEIVER_ROLES and u.telegram_id != user.telegram_id]
+    except StorageUnavailable:
+        await message.answer(UNAVAILABLE, reply_markup=kb.main_menu())
+        return
+    if not people:
+        await message.answer("Некому выдавать: в таблице нет активных прорабов и РП.",
+                             reply_markup=kb.main_menu())
+        return
+    nonce = secrets.token_hex(3)
+    await state.update_data(nonce=nonce, flow="cash", files=[],
+                            people=[(u.telegram_id, u.name, sorted(u.objects), u.sees_all) for u in people])
+    await state.set_state(Cash.who)
+    await message.answer("Кому выдали деньги?", reply_markup=kb.step())
+    await message.answer("Получатель:", reply_markup=kb.inline(
+        [(f"{u.name} ({u.role})", _cb("cw", nonce, str(i))) for i, u in enumerate(people)]))
+
+
+@router.callback_query(Cash.who, F.data.startswith("cw:"))
+async def cash_who(call: CallbackQuery, state: FSMContext) -> None:
+    payload = await _arg(call, state)
+    picked = _pick((await state.get_data())["people"], payload) if payload is not None else None
+    if picked is None:
+        return
+    tid, name, objs, sees_all = picked
+    await state.update_data(to_id=tid, to_name=name, to_objs=objs, to_all=sees_all)
+    await _close_buttons(call, f"Кому: {name}")
+    await state.set_state(Cash.amount)
+    await call.message.answer("Сколько? Например 50000 или 50к.", reply_markup=kb.step())
+
+
+@router.message(Cash.amount, F.text)
+async def cash_amount(message: Message, state: FSMContext, db: Storage) -> None:
+    try:
+        amount = parse_money(message.text)
+    except InputError as e:
+        await message.answer(str(e))
+        return
+    await state.update_data(amount=amount)
+    d = await state.get_data()
+    try:
+        all_objs = [o for o in await db.list_objects() if o.active]
+    except StorageUnavailable:
+        all_objs = []
+    objs = all_objs if d["to_all"] else [o for o in all_objs if o.id in d["to_objs"]]
+    await state.update_data(cash_objs=[(o.id, o.name) for o in objs])
+    await state.set_state(Cash.obj)
+    opts = [(o.name, _cb("co", d["nonce"], str(i))) for i, o in enumerate(objs)]
+    opts.append(("Без объекта", _cb("co", d["nonce"], "-")))
+    await message.answer("На какой объект?", reply_markup=kb.inline(opts))
+
+
+@router.callback_query(Cash.obj, F.data.startswith("co:"))
+async def cash_obj(call: CallbackQuery, state: FSMContext) -> None:
+    payload = await _arg(call, state)
+    if payload is None:
+        return
+    if payload == "-":
+        oid, name = "", ""
+    else:
+        picked = _pick((await state.get_data())["cash_objs"], payload)
+        if picked is None:
+            return
+        oid, name = picked
+    await state.update_data(obj_id=oid, obj_name=name)
+    await _close_buttons(call, f"Объект: {name or 'без объекта'}")
+    await state.set_state(Cash.purpose)
+    await call.message.answer("На что? Например «песок», «зарплата бригаде».",
+                              reply_markup=kb.step(kb.BTN_SKIP))
+
+
+@router.message(Cash.purpose, F.text)
+async def cash_purpose(message: Message, state: FSMContext, cfg: Config) -> None:
+    await state.update_data(purpose="" if message.text == kb.BTN_SKIP else message.text.strip())
+    d = await state.get_data()
+    await state.set_state(Cash.confirm)
+    await _ask_confirm(message, state, cfg, "ПО",
+                       f"💰 Выдано под отчёт\nКому: {d['to_name']}\nСумма: {money(d['amount'])}\n"
+                       f"Объект: {d['obj_name'] or '—'}\nНа что: {d['purpose'] or '—'}")
+
+
+@router.callback_query(Cash.confirm, F.data.startswith("save:"))
+async def cash_save(call: CallbackQuery, state: FSMContext, db: Storage, cfg: Config,
+                    user: User, bot: Bot) -> None:
+    if await _arg(call, state) is None:
+        return
+    d = await state.get_data()
+    row = {"ID": d["row_id"], "Дата": _now(cfg).strftime("%Y-%m-%d %H:%M"), "Кому ID": d["to_id"],
+           "Кому": d["to_name"], "Объект ID": d["obj_id"], "Объект": d["obj_name"],
+           "Сумма": d["amount"], "На что": d["purpose"], "Выдал ID": user.telegram_id, "Выдал": user.name}
+    if not await _save(call, state, db, "Подотчёт", row):
+        return
+    balance_line = await _balance_line(db, d["to_id"])
+    await _finish(call, state, f"Записано ({row['ID']}). {d['to_name']}{balance_line.replace(chr(10), ': ', 1)}")
+    await _send(bot, d["to_id"], f"💰 {user.name} выдал вам {money(d['amount'])}"
+                                 f"{' на ' + d['purpose'] if d['purpose'] else ''}"
+                                 f"{' · ' + d['obj_name'] if d['obj_name'] else ''}.{balance_line}")
+
+
+# ── Счёт на оплату ────────────────────────────────────────────────────────────
+# Прораб или снабжение прикладывает счёт → директор согласует → бухгалтер оплачивает.
+# Кнопки в уведомлении работают без сценария: ID счёта в callback_data.
+
+@menu.message(F.text == kb.BTN_INVOICE)
+async def invoice_start(message: Message, state: FSMContext, db: Storage, user: User) -> None:
+    await _start_flow(message, state, db, user, "invoice", roles=INVOICE_ROLES)
+
+
+@router.message(Invoice.file, MEDIA)
+async def invoice_file(message: Message, state: FSMContext, bot: Bot, cfg: Config, user: User) -> None:
+    await _collect_media(message, state, bot, cfg, user)
+    d = await state.get_data()
+    if len(d["files"]) == 1:
+        await state.set_state(Invoice.what)
+        await message.answer("За что и сумма? «Дорнит 2 рулона 18500».", reply_markup=kb.step())
+
+
+@router.message(Invoice.what, MEDIA)
+async def invoice_more_files(message: Message, state: FSMContext, bot: Bot, cfg: Config, user: User) -> None:
+    await _collect_media(message, state, bot, cfg, user)
+    await message.answer("Теперь напишите, за что и сумму.")
+
+
+@router.message(Invoice.what, F.text)
+async def invoice_what(message: Message, state: FSMContext, cfg: Config) -> None:
+    if message.text == kb.BTN_DONE:
+        await message.answer("Напишите, за что и сумму: «Дорнит 2 рулона 18500».")
+        return
+    try:
+        a = parse_amount(message.text)
+    except InputError as e:
+        await message.answer(str(e))
+        return
+    await state.update_data(what=a.what, amount=a.amount)
+    d = await state.get_data()
+    await state.set_state(Invoice.confirm)
+    await _ask_confirm(message, state, cfg, "СЧ",
+                       f"🧾 Счёт · {d['obj_name']}\nЗа что: {a.what}\nСумма: {money(a.amount)}\n"
+                       f"Файлов: {len(d['files'])}")
+
+
+def _invoice_buttons(inv_id: str, status: str):
+    opts = []
+    if status == INVOICE_NEW:
+        opts += [("👍 Согласовать", f"inv:a:{inv_id}"), ("✖ Отклонить", f"inv:r:{inv_id}")]
+    if status in {INVOICE_NEW, INVOICE_APPROVED}:
+        opts.append(("✅ Оплачено", f"inv:p:{inv_id}"))
+    return kb.inline(opts, per_row=2) if opts else None
+
+
+@router.callback_query(Invoice.confirm, F.data.startswith("save:"))
+async def invoice_save(call: CallbackQuery, state: FSMContext, db: Storage, cfg: Config,
+                       user: User, bot: Bot) -> None:
+    if await _arg(call, state) is None:
+        return
+    d = await state.get_data()
+    row = {"ID": d["row_id"], "Создан": _now(cfg).strftime("%Y-%m-%d %H:%M"), "Объект ID": d["obj_id"],
+           "Объект": d["obj_name"], "Автор ID": user.telegram_id, "Автор": user.name,
+           "За что": d["what"], "Сумма": d["amount"], "Файлы (ссылки)": _links(d["files"]),
+           "Файлы (file_id)": _file_ids(d["files"]), "Статус": INVOICE_NEW}
+    if not await _save(call, state, db, "Счета", row):
+        return
+    await _finish(call, state, f"Счёт {row['ID']} отправлен на согласование. Сообщу, когда оплатят.")
+    text = (f"🧾 Счёт {row['ID']} · {d['obj_name']}\nОт: {user.name}\nЗа что: {d['what']}\n"
+            f"Сумма: {money(d['amount'])}\n{_links(d['files'])}").strip()
+    for u in users_to_notify(await _users_or_empty(db), NOTIFY_INVOICE_ROLES, d["obj_id"], user.telegram_id):
+        try:
+            await bot.send_message(u.telegram_id, _clip(text), reply_markup=_invoice_buttons(row["ID"], INVOICE_NEW))
+        except Exception as e:
+            log.warning("не отправлено %s: %s", u.telegram_id, e)
+
+
+@menu.callback_query(F.data.startswith("inv:"))
+async def invoice_action(call: CallbackQuery, db: Storage, cfg: Config, user: User, bot: Bot) -> None:
+    _, action, inv_id = call.data.split(":", 2)
+    allowed = {"a": APPROVE_ROLES, "r": APPROVE_ROLES, "p": PAY_ROLES}.get(action, set())
+    if user.role not in allowed:
+        await call.message.answer("Согласует директор, отмечает оплату бухгалтер или директор.")
+        return
+    try:
+        inv = next((r for r in await db.rows("Счета") if r.get("ID") == inv_id), None)
+    except StorageUnavailable:
+        await call.message.answer(UNAVAILABLE)
+        return
+    if inv is None:
+        await call.message.answer("Счёт не найден в таблице.")
+        return
+    status = str(inv.get("Статус", ""))
+    new_status = {"a": INVOICE_APPROVED, "r": INVOICE_REJECTED, "p": INVOICE_PAID}[action]
+    if status in {INVOICE_PAID, INVOICE_REJECTED} or (action == "a" and status != INVOICE_NEW):
+        await call.message.answer(f"Счёт уже: {status}.")
+        await _close_buttons(call)
+        return
+    stamp = f"{user.name}, {_now(cfg):%Y-%m-%d %H:%M}"
+    fields = {"Статус": new_status}
+    if action in {"a", "r"}:
+        fields["Согласовал"] = stamp
+    else:
+        fields.update({"Оплатил": user.name, "Дата оплаты": _now(cfg).strftime("%Y-%m-%d")})
+    try:
+        await db.update("Счета", "ID", inv_id, fields)
+    except StorageUnavailable:
+        await call.message.answer(UNAVAILABLE)
+        return
+    try:
+        await call.message.edit_text(_clip(f"{call.message.text or ''}\n\n➡️ {new_status} — {stamp}"),
+                                     reply_markup=_invoice_buttons(inv_id, new_status))
+    except Exception as e:
+        log.debug("не отредактировано: %s", e)
+    summary = f"🧾 Счёт {inv_id} ({inv.get('За что', '')}, {money(float(inv.get('Сумма') or 0))}): {new_status} — {user.name}."
+    author_id = inv.get("Автор ID")
+    if author_id and str(author_id) != str(user.telegram_id):
+        await _send(bot, int(author_id), summary)
+    if action == "a":                        # согласовали → бухгалтеру к оплате
+        for u in await _users_or_empty(db):
+            if u.active and u.role == "бухгалтер" and u.telegram_id != user.telegram_id:
+                try:
+                    await bot.send_message(u.telegram_id, _clip(f"К оплате: {summary}\n{inv.get('Файлы (ссылки)', '')}"),
+                                           reply_markup=_invoice_buttons(inv_id, INVOICE_APPROVED))
+                except Exception as e:
+                    log.warning("не отправлено %s: %s", u.telegram_id, e)
+
+
+# ── Приглашения: человек сам попадает в таблицу с ролью и объектами ───────────
+
+INVITE_DAYS = 7
+_bot_username = ""
+
+
+async def _username(bot: Bot) -> str:
+    global _bot_username
+    if not _bot_username:
+        _bot_username = (await bot.get_me()).username or ""
+    return _bot_username
+
+
+def _invite_code(event) -> str:
+    text = getattr(event, "text", None) or ""
+    m = text.split()
+    if len(m) == 2 and m[0].split("@")[0] == "/start" and m[1].startswith("inv_"):
+        return m[1][4:]
+    return ""
+
+
+async def _accept_invite(code: str, tg_user, user: User | None, db: Storage, cfg: Config,
+                         bot: Bot) -> str:
+    """Проверить код, добавить или включить пользователя. Возвращает текст ответа."""
+    inv = next((r for r in await db.rows("Приглашения") if str(r.get("Код")) == code), None)
+    if inv is None:
+        return "Ссылка-приглашение не найдена. Попросите новую."
+    if str(inv.get("Использовал ID", "")).strip():
+        return "Эта ссылка уже использована. Попросите новую."
+    try:
+        created = datetime.fromisoformat(str(inv.get("Создано")))
+        if created.tzinfo is None:
+            created = created.replace(tzinfo=ZoneInfo(cfg.tz))
+        if _now(cfg) - created > timedelta(days=INVITE_DAYS):
+            return "Срок ссылки истёк. Попросите новую."
+    except ValueError:
+        return "Ссылка повреждена. Попросите новую."
+    name = " ".join(filter(None, [tg_user.first_name, tg_user.last_name])) or str(tg_user.id)
+    role, objs = str(inv.get("Роль")), str(inv.get("Объекты", ""))
+    now = _now(cfg).strftime("%Y-%m-%d %H:%M")
+    if user is None:
+        await db.append("Пользователи", {"Telegram ID": tg_user.id, "ФИО": name, "Роль": role,
+                                         "Объекты": objs, "Активен": "да",
+                                         "Username": tg_user.username or "", "Добавлен": now,
+                                         "Комментарий": f"по приглашению {code}"})
+    else:
+        await db.update("Пользователи", "Telegram ID", tg_user.id,
+                        {"Роль": role, "Объекты": objs, "Активен": "да"})
+    await db.update("Приглашения", "Код", code,
+                    {"Использовал ID": tg_user.id, "Использовал": name, "Использовано": now})
+    kb.CURRENT_ROLE.set(role)
+    try:
+        await _send(bot, int(inv.get("Создал ID")), f"✅ {name} принял приглашение: {role}, объекты: {objs}.")
+    except (TypeError, ValueError):
+        pass
+    return f"Готово, {name}! Вы в системе как «{role}».\n\n{HELP}"
+
+
+@menu.message(F.text == kb.BTN_INVITE)
+async def invite_start(message: Message, state: FSMContext, user: User) -> None:
+    await state.clear()
+    if user.role not in INVITE_ROLES:
+        await message.answer("Приглашать могут директор и помощник.", reply_markup=kb.main_menu())
+        return
+    nonce = secrets.token_hex(3)
+    roles = ["прораб", "бригадир", "рп", "снабжение", "помощник", "экономист", "бухгалтер", "геодезист"]
+    await state.update_data(nonce=nonce, roles=roles, picked=[])
+    await state.set_state(Invite.role)
+    await message.answer("Кого приглашаем?", reply_markup=kb.step())
+    await message.answer("Роль:", reply_markup=kb.inline(
+        [(r, _cb("ir", nonce, str(i))) for i, r in enumerate(roles)], per_row=3))
+
+
+@router.callback_query(Invite.role, F.data.startswith("ir:"))
+async def invite_role(call: CallbackQuery, state: FSMContext, db: Storage, cfg: Config,
+                      user: User, bot: Bot) -> None:
+    payload = await _arg(call, state)
+    d = await state.get_data()
+    role = _pick(d["roles"], payload) if payload is not None else None
+    if role is None:
+        return
+    await state.update_data(role=role)
+    await _close_buttons(call, f"Роль: {role}")
+    if role in ALL_OBJECTS_ROLES:            # видят все объекты — выбирать нечего
+        await _make_invite(call.message, state, db, cfg, user, bot, "все")
+        return
+    try:
+        objs = [o for o in await db.list_objects() if o.active]
+    except StorageUnavailable:
+        await call.message.answer(UNAVAILABLE)
+        return
+    await state.update_data(inv_objs=[(o.id, o.name) for o in objs])
+    await state.set_state(Invite.objects)
+    await call.message.answer("Отметьте объекты (можно несколько), затем «Готово».",
+                              reply_markup=_invite_objects_kb(await state.get_data()))
+
+
+def _invite_objects_kb(d: dict):
+    opts = [(("☑️ " if oid in d["picked"] else "⬜ ") + name, _cb("io", d["nonce"], str(i)))
+            for i, (oid, name) in enumerate(d["inv_objs"])]
+    opts += [("Все объекты", _cb("io", d["nonce"], "all")), ("Готово", _cb("io", d["nonce"], "done"))]
+    return kb.inline(opts)
+
+
+@router.callback_query(Invite.objects, F.data.startswith("io:"))
+async def invite_objects(call: CallbackQuery, state: FSMContext, db: Storage, cfg: Config,
+                         user: User, bot: Bot) -> None:
+    payload = await _arg(call, state)
+    if payload is None:
+        return
+    d = await state.get_data()
+    if payload == "all":
+        await _close_buttons(call, "Объекты: все")
+        await _make_invite(call.message, state, db, cfg, user, bot, "все")
+        return
+    if payload == "done":
+        if not d["picked"]:
+            await call.message.answer("Отметьте хотя бы один объект или нажмите «Все объекты».")
+            return
+        await _close_buttons(call, "Объекты: " + ", ".join(d["picked"]))
+        await _make_invite(call.message, state, db, cfg, user, bot, ", ".join(d["picked"]))
+        return
+    picked_obj = _pick(d["inv_objs"], payload)
+    if picked_obj is None:
+        return
+    picked = set(d["picked"]) ^ {picked_obj[0]}
+    await state.update_data(picked=[oid for oid, _ in d["inv_objs"] if oid in picked])
+    try:
+        await call.message.edit_reply_markup(reply_markup=_invite_objects_kb(await state.get_data()))
+    except Exception as e:
+        log.debug("не отредактировано: %s", e)
+
+
+async def _make_invite(message: Message, state: FSMContext, db: Storage, cfg: Config, user: User,
+                       bot: Bot, objects: str) -> None:
+    d = await state.get_data()
+    code = secrets.token_urlsafe(9)
+    try:
+        await db.append("Приглашения", {"Код": code, "Роль": d["role"], "Объекты": objects,
+                                        "Создал ID": user.telegram_id, "Создал": user.name,
+                                        "Создано": _now(cfg).isoformat(timespec="seconds")})
+    except StorageUnavailable:
+        await _to_menu(message, state, UNAVAILABLE)
+        return
+    link = f"https://t.me/{await _username(bot)}?start=inv_{code}"
+    await _to_menu(message, state,
+                   f"Перешлите эту ссылку человеку ({d['role']}, объекты: {objects}):\n\n{link}\n\n"
+                   f"Он нажмёт «Запустить» — и сразу попадёт в систему, ничего вписывать в таблицу "
+                   f"не нужно. Ссылка одноразовая, действует {INVITE_DAYS} дней.")
 
 
 # ── Всё остальное ─────────────────────────────────────────────────────────────

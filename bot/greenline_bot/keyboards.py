@@ -2,14 +2,24 @@
 
 from __future__ import annotations
 
+from contextvars import ContextVar
+
 from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
                            KeyboardButton, ReplyKeyboardMarkup)
+
+# Роль текущего пользователя: ставит AccessMiddleware, читает main_menu().
+CURRENT_ROLE: ContextVar[str] = ContextVar("current_role", default="")
 
 BTN_REPORT = "📋 Отчёт за день"
 BTN_REQUEST = "🧱 Заявка"
 BTN_ACCEPT = "✅ Приёмка"
 BTN_NOTE = "📝 Запись по объекту"
 BTN_BUG = "🐞 Ошибка в боте"
+BTN_EXPENSE = "💸 Расход"
+BTN_INVOICE = "🧾 Счёт на оплату"
+BTN_CASH = "💰 Выдал деньги"
+BTN_INVITE = "🔗 Пригласить"
+BTN_BALANCE = "💼 Подотчёт"
 BTN_CANCEL = "❌ Отмена"
 BTN_SKIP = "Пропустить"
 BTN_NO = "Нет"
@@ -17,12 +27,24 @@ BTN_DONE = "Готово"
 BTN_NO_PHOTO = "Без фото"
 
 
-def main_menu() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text=BTN_REPORT), KeyboardButton(text=BTN_REQUEST)],
-                  [KeyboardButton(text=BTN_ACCEPT), KeyboardButton(text=BTN_NOTE)],
-                  [KeyboardButton(text=BTN_BUG)]],
-        resize_keyboard=True, is_persistent=True)
+SENDERS = {"прораб", "бригадир", "рп", "директор", "помощник"}
+
+
+def main_menu(role: str | None = None) -> ReplyKeyboardMarkup:
+    """Меню по роли: каждый видит только то, что ему можно."""
+    role = role if role is not None else CURRENT_ROLE.get()
+    rows: list[list[str]] = []
+    if role in SENDERS:
+        rows += [[BTN_REPORT, BTN_EXPENSE], [BTN_REQUEST, BTN_ACCEPT], [BTN_INVOICE, BTN_NOTE]]
+    elif role == "снабжение":
+        rows += [[BTN_INVOICE]]
+    if role in {"директор", "помощник"}:
+        rows += [[BTN_CASH, BTN_INVITE]]
+    elif role == "бухгалтер":
+        rows += [[BTN_CASH]]
+    rows += [[BTN_BALANCE, BTN_BUG]]
+    return ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t) for t in r] for r in rows],
+                               resize_keyboard=True, is_persistent=True)
 
 
 def step(*buttons: str) -> ReplyKeyboardMarkup:
