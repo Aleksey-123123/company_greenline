@@ -12,7 +12,8 @@ def _load_dotenv(path: Path) -> None:
     """Минимальный разбор .env: KEY=VALUE, # комментарии. Окружение важнее файла."""
     if not path.exists():
         return
-    for line in path.read_text(encoding="utf-8").splitlines():
+    # utf-8-sig: Блокнот Windows может сохранить файл с невидимой меткой BOM в начале
+    for line in path.read_text(encoding="utf-8-sig").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
@@ -50,7 +51,8 @@ def load_config(env_file: Path | None = None, require_token: bool = True) -> Con
     _load_dotenv(env_file or BOT_DIR / ".env")
     token = os.environ.get("BOT_TOKEN", "").strip()
     if require_token and not token:
-        raise ConfigError("BOT_TOKEN не задан (см. bot/.env.example)")
+        raise ConfigError("BOT_TOKEN не задан: откройте файл .env в папке bot и вставьте токен "
+                          "от @BotFather после BOT_TOKEN=")
     storage = os.environ.get("STORAGE", "sheets").strip().lower()
     if storage not in {"sheets", "memory"}:
         raise ConfigError("STORAGE должен быть sheets или memory")
