@@ -31,8 +31,10 @@ def main() -> None:
                 z.writestr(info, p.read_bytes())
             else:
                 z.write(p, name)
-        z.writestr("bot/secrets/положите-сюда-service-account.json.txt",
-                   "В эту папку положить ключ Google под именем service-account.json\n")
+        z.writestr("bot/secrets/ПРОЧТИ-МЕНЯ.txt",
+                   "Эта папка для ключа Google. Он нужен, только когда бот пишет в Google Таблицу.\r\n"
+                   "Как получить ключ — ЗАПУСК-НА-КОМПЬЮТЕРЕ.md, раздел C, шаг 2.\r\n"
+                   "Скачанный ключ переименовать в service-account и положить сюда.\r\n")
     print(f"{out.name}: {len(files) + 1} файлов, {out.stat().st_size} байт")
 
 
