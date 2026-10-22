@@ -35,9 +35,15 @@ def install() -> bool:
 
 def open_editor(path: Path) -> None:
     if os.name == "nt":
-        subprocess.run(["notepad.exe", str(path)])        # ждёт, пока Блокнот закроют
+        # Блокнот Windows 11 может вернуть управление сразу, не дожидаясь закрытия,
+        # поэтому дополнительно ждём Enter.
+        subprocess.run(["notepad.exe", str(path)])
     else:
         say(f"Откройте и заполните файл: {path}")
+    try:
+        input("\nКогда вставите токен и сохраните файл (Ctrl+S) — нажмите здесь Enter... ")
+    except EOFError:            # запуск без клавиатуры (тесты, сервер)
+        pass
 
 
 def token_filled() -> bool:
