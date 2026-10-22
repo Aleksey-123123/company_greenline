@@ -1,3 +1,4 @@
 aiogram==3.29.1
 gspread==6.2.1
+aiohttp-socks==0.10.1
 tzdata==2025.2

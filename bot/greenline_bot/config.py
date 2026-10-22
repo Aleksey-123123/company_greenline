@@ -30,6 +30,7 @@ class Config:
     archive_chat_id: int | None
     admin_ids: frozenset[int]
     tz: str
+    telegram_proxy: str = ""          # http://… или socks5://… — если api.telegram.org недоступен
 
 
 class ConfigError(Exception):
@@ -70,4 +71,5 @@ def load_config(env_file: Path | None = None, require_token: bool = True) -> Con
         raise ConfigError(f"ADMIN_IDS и ARCHIVE_CHAT_ID — числа: {e}")
     return Config(bot_token=token, storage=storage, sheet_id=sheet_id,
                   google_credentials=creds, archive_chat_id=archive_id,
-                  admin_ids=admins, tz=os.environ.get("TZ", "Asia/Novosibirsk").strip())
+                  admin_ids=admins, tz=os.environ.get("TZ", "Asia/Novosibirsk").strip(),
+                  telegram_proxy=os.environ.get("TELEGRAM_PROXY", "").strip())

@@ -76,7 +76,7 @@ def main() -> int:
         return 1
     if mode == "table":
         return subprocess.run([sys.executable, "-m", "greenline_bot.setup_sheet"], cwd=HERE).returncode
-    say("\nБот запускается. Пока это окно открыто — бот работает. Закрыть окно = остановить бота.\n")
+    say("\nБот запускается. Пока это окно открыто — бот работает. Закрыть окно = остановить бота.")
     code = subprocess.run([sys.executable, "-m", "greenline_bot"], cwd=HERE).returncode
     say("\nБот остановлен.")
     return code

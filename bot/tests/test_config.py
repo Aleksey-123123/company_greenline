@@ -25,6 +25,11 @@ class Config(unittest.TestCase):
             self._load("BOT_TOKEN=\nSTORAGE=memory\n")
         self.assertIn("BOT_TOKEN", str(e.exception))
 
+    def test_proxy_optional(self):
+        self.assertEqual(self._load("BOT_TOKEN=1:a\nSTORAGE=memory\n").telegram_proxy, "")
+        cfg = self._load("BOT_TOKEN=1:a\nSTORAGE=memory\nTELEGRAM_PROXY=socks5://u:p@1.2.3.4:1080\n")
+        self.assertEqual(cfg.telegram_proxy, "socks5://u:p@1.2.3.4:1080")
+
     def test_sheets_needs_table(self):
         with self.assertRaises(ConfigError):
             self._load("BOT_TOKEN=1:a\nSTORAGE=sheets\n")
