@@ -1,0 +1,89 @@
+[0:07]
+Hello, colleagues. My name is Georgy Geroev, and I am the co-founder of the automation studio Offgroup. We help companies grow and develop online. This video will be primarily useful for those planning to implement Bitrix24.
+
+[0:20]
+We understand perfectly well that discussing various aspects of a project with an integrator is much easier if we share a common vocabulary. If you understand the tools available, what they look like, and how they work, Bitrix24 should be viewed as a corporate portal. It is a large set of tools that can be configured for any business. And believe it or not, Bitrix currently has no direct competitors in Russia. Yes, there is the unfriendly 1C , there are niche industry CRMs, and a bunch of great standalone services like Tilda, Marquiz, and so on. There is even AmoCRM, which is probably the closest competitor to Bitrix. But that is where it ends—at sales department automation. And beyond that, nothing.
+
+[1:03]
+Yes, you can assemble all of this into a single system. It will function like a zoo of disparate solutions that you have to pay for separately, manage with different support teams, and constantly switch between. As I said earlier, Bitrix24 is a full-fledged virtual office for your company, containing almost everything you need for work. In this overview video, we will briefly cover the main interfaces, tools, and workflows. You can access Bitrix24 via a browser, a desktop application installed on your computer, or a mobile app. Note that some features of the desktop version are missing in the mobile app. Every employee in Bitrix24 works under their own personal account.
+
+[1:50]
+The portal administrator must send them an invitation, and the employee must complete the registration. Accordingly, each employee has a personal profile on the portal that they can—and should —configure. Every added employee counts towards the license limit, which depends on the chosen plan. On the base plan, for example, only five users can work. The list of all employees can be found in the Company section in the left-hand menu. Here, you can see how employees are distributed by department or simply view the entire list. The main menu, as you may have already noticed, is located on the left side of the screen. It can be displayed in a collapsed or expanded view. Access to almost all tools is provided from here.
+
+[2:27]
+Each user can customize the menu to their own preferences. You can also force the same menu layout for all employees. Let’s start our overview of Bitrix24 with the tools that help the entire company work in a unified virtual space. You can move all your company communications into Bitrix24 and stop using Telegram, WhatsApp, Zoom , and other messengers you currently rely on. It provides all the necessary tools for this: internal chats, both one-on-one and group. It offers the ability to make video and audio calls to colleagues, as well as host video conferences and invite external users.
+
+[3:03]
+Bitrix24 has two types of calendars: my calendar and the company calendar. In the My Calendar section, you can create a convenient schedule, plan meetings with colleagues, and track task deadlines in a single window. To plan events related to the entire company, use the company calendar. Every employee can add events here. The Bitrix24 drive is a cloud-based disk, just like Yandex or Google Drive. Each user has a personal disk that is inaccessible to anyone else. There is a shared disk for storing the company's common documents. You can set access permissions for each folder or file.
+
+[3:36]
+You can also generate a public link to a file or folder. The cloud disk size is limited by your plan, or by your server settings for self-hosted versions. The Bitrix24 Task Tracker is one of our most important tools. No matter how hard we try, we can't keep everything in our heads, so it's vital to record every instruction and task and set a deadline. A task card itself can contain a title, a detailed description, a checklist, files, and a list of employees involved in the completion. This is a very important point. A task can have only one person responsible for it. One specific employee must be accountable for the final result of the task. They can be assisted by co-executors, and managers are often added as observers. A task is a cross-cutting element in Bitrix24. It can be created from many different
+
+[4:25]
+places and linked to other entities. For example, a task can be linked to an incoming email, a chat message, and, of course, all CRM elements: deals, contacts, companies, and so on. You can work with tasks in various views. There is a classic list or my favorite view, Deadlines, where all tasks are grouped according to their due date. CRM is a set of tools and elements that optimize and automate your work with clients.
+
+[4:53]
+From the first contact to closing a deal, and actually even beyond, allowing you to work effectively with your existing customer base, measure loyalty, provide service and warranty support, track contract expiration dates, licenses, subscriptions, and much more. Now we will break down the basic elements of the CRM, which are often called entities. If you hear the word "entity," we are referring to deals, leads, companies, and other CRM elements. A lead is a CRM element that allows you to record primary information about a potential client.
+
+[5:23]
+Many are familiar with the concept of a lead as an inquiry or application. So, a lead in Bitrix24 is a card where request data is captured: name, phone, email, and an initial comment. Leads in Bitrix24 are usually created automatically. An incoming call comes in, a lead is created. A client fills out a form on the website, a lead is created. And so on. There is one exception here. A scenario where you work with cold databases and manually upload them in bulk into leads so that managers can call everyone and qualify them. Leads are only needed for qualifying inquiries. Target or non-target. The most typical mistake is trying to sell in the lead stage, discussing terms, and making offers. A poor-quality lead should be rejected immediately. A quality lead is converted, meaning new CRM entities or items are created based on its data. In
+
+[6:08]
+most cases, a deal and a contact are created. If you work in B2B or B2G, a company is also added to this combination. Bitrix24 has a mode that operates without leads. It makes sense to use it if there are few requests and they are mostly targeted. In this case, we don't need a separate funnel to sort through a mountain of incoming requests . B2B companies almost never use leads.
+
+[6:39]
+If we choose the no-lead mode, a deal with a contact or a contact and company is created immediately. A deal is the main card you work with during a specific sales or service process. All terms are recorded in it, and the necessary fields are filled out. The list of fields and the blocks they are organized into are configured during implementation. Products, services, and costs are added to the deal. You can select products from the catalog. To do this, you must enter them beforehand or write the name and price directly in the deal. On the right side of the deal is the event timeline. Calls, emails, chats, tasks, comments, status changes, payments, and so on will appear here. A contact or a contact and company must always be linked to a deal. Accordingly , we have lists of contacts and companies. This is our customer
+
+[7:30]
+database. By opening any contact or company, we can see the entire communication history and see deals, when and what we sold or tried to sell to this client. One contact can be associated with several companies.
+
+[7:42]
+Likewise, one company can have several contact persons. Standard cards are provided for storing documents. No additional fields need to be created. In companies, details for sole proprietorships and LLCs are filled out . Moreover, all data except banking details are filled in automatically by INN. In contacts, the details of the individual are filled out accordingly.
+
+[8:08]
+To record payments in Bitrix24, another entity is used: invoices. An invoice is created in the deal, and then payment must be received against it. Depending on your business specifics, you can generate a printable invoice form and send it to the client. And here we will need the document generator. We prepare an invoice template in advance, where we insert variables. That is, data that will be filled in automatically from the data available in the CRM entities.
+
+[8:34]
+The document generator is also used to create commercial proposals, contracts, acts, and so on. Back to our invoice. If the payment was via bank transfer, the invoice status must be set manually after the funds arrive. You can also generate and send a payment link for bank cards or via SBP. With this type of payment, the invoice will be marked as paid automatically. Leads, deals, contacts, companies, and invoices are standard CRM elements. But there are situations where this is not enough.
+
+[9:05]
+The most common example is contracts. We need a separate contract card because one client may have different types of contracts with different deadlines, and these must be tracked.
+
+[9:13]
+This is where Smart Processes come to our aid. A Smart Process is a customizable CRM item type. You create it, name it as you need, decide if this entity needs stages, and create links with other CRM elements, for example, so that you can see all contracts ever signed with a specific company on a separate tab in the company card. Smart Processes are also frequently used to store information about vehicles or equipment, both client-owned and your own. They are used for organizing HR funnels, supply department operations, setting up a client support ticketing system, and much more. We've covered the basic elements. Now, let's talk about the operational logic. As I said before, a deal is the main central card to which all others are attached.
+
+[9:56]
+Sometimes you have to shift your mindset here if you are used to working in terms of the client rather than the order or deal. All deals go through a specific sequence of steps or stages.
+
+[10:06]
+This sequence is called a funnel. We are currently in the sales funnel and see the standard stages. One of the key points is to define what stages we will have, what actions an employee must perform at each one, and which automation scenarios will run at a given stage. But more on automation later. This visual representation of deals at various stages is called a Kanban. Essentially, it is a board where you see the cards of all deals currently in progress and which stage they are at. There is also a classic list view, but most companies work specifically with Kanban. It makes no sense to cram absolutely all stages of working with a client into one funnel.
+
+[10:42]
+In most cases, this is inconvenient and impractical. Usually, the division occurs into at least two funnels. The sales funnel, where we guide the client to signing a contract or receiving payment. And then the fulfillment funnel. This could be product delivery, production, or providing a service that the client has paid for. If a company has several business areas, there may be multiple sales funnels or multiple fulfillment funnels. But here you need to evaluate the feasibility. For example, in a car dealership, it would be justified to split the sales funnel into car sales and service, because they have different stages and different people responsible for them.
+
+[11:15]
+However, splitting tour sales into two funnels—domestic tours and international tours—likely doesn't make sense. And if you need to restrict someone's visibility or editing capabilities, this can be done through access rights settings. Access rights are always outlined in our technical specification. First, a role is created , such as a sales manager or a supervisor. An access matrix is configured for this role. We define the level of access to each CRM entity.
+
+[11:39]
+Next, we assign this role to an employee, a department, or a group of users. It is most convenient to work with departments. When you hire a new employee and place them in the Sales department, they automatically receive the necessary permissions. An important feature that must be mentioned is automation. It helps reduce the impact of human error on processes and saves employees from having to perform routine operations. These can be offloaded to robots. A robot is a CRM automation tool that allows you to perform specific actions automatically.
+
+[12:11]
+Create a task, send notifications. Rename a deal using a template. A robot is placed on a specific stage and triggered when a deal moves to that stage. Actually, not just deals; it works in any entity that has a Kanban view. Triggers are another CRM automation tool that tracks client actions and certain changes within the CRM. The most common scenario is a payment trigger. It can detect that a client has paid an invoice and move the deal to the designated stage. Robots and triggers are available even on the basic plan. Business processes are also available on the professional plan. In Bitrix24, a business process is a set of automation tools that lets you build complex sequences of actions with conditions, waits for user or client input, data requests, and more. A business process can be written for a
+
+[13:01]
+specific funnel stage, and like a robot , it will run when a deal enters that stage. There is also a separate section for business processes that can be triggered upon adding or changing a CRM entity. I would like to pause here for an important point, as confusion sometimes arises. In our technical requirements, you will encounter the term "task." This is a standard task with a title, description, possibly a checklist, and the ability to mark it as complete. You will also encounter the term "business process assignment."
+
+[13:27]
+This is a dialog box where some action is required from you. This could be filling out information, attaching files, or providing approval. Business process assignments are found in the left menu under the Automation section.
+
+[13:38]
+Accordingly, the counter shows how many business processes require your attention. Additionally, we always send notifications to the bell icon when something needs to be done. System events also end up here. A new task has been assigned to you, a message arrived from a client, and so on. Essentially, everything new that happens and concerns you is reflected here. To work effectively with clients, you must take control of all communications so that every message, email, or call is recorded in the system. In the Contact Center section, we can connect all necessary communication channels with clients. Most often, we connect telephony for our clients. You can use the built-in Bitrix PBX by setting up incoming numbers directly there. You can also connect absolutely any external PBX. Next is email. The built-in mail client allows you to
+
+[14:25]
+connect any email account and configure actions for when new messages arrive. And WhatsApp, of course—we can't forget that. It's not quite that simple , but we will certainly explain all the options and specifics to you. The last thing I would like to mention is the application marketplace. Here, third-party developers publish solutions that extend Bitrix's standard functionality. We, for example, have published about thirty applications.
+
+[14:51]
+Applications in the marketplace are divided into three categories: free ones. These are usually integration solutions to connect your telephony, SMS provider, payment system, and so on . The majority of Marketplace applications are distributed via subscription. Just like with an online streaming service, you pay for a subscription and can use any application. The subscription cost depends on your primary license. Some applications have additional paid features. In that case, payment is made directly to the developer. Well, it looks like you now have an idea of what Bitrix24 is and are ready to discuss its implementation with your integrator . If you found this useful, please like and subscribe. For more detailed information, check out our Bitrix24 training course. The link is in the video description. Our contact details
+
+[15:37]
+are there as well. Bye for now. Not

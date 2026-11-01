@@ -1,0 +1,80 @@
+[0:02]
+Hello. My name is Alexandra Guseva, and I work as an analyst at RDN Group. We implement CRM systems and corporate portals. Our goal is to help you get the maximum benefit from the Bitrix24 CRM system for your business. And today we will talk about the possibilities of the Bitrix24 platform for the construction industry and look into the tools available for this. To keep up with our new materials, subscribe to our channel on YouTube and VKontakte.
+
+[0:30]
+Also join us on Telegram. There we share relevant company information, case studies, and useful articles. All useful links will be in the description . If you don't have Bitrix24 yet, then this is a sign to implement a CRM system. A feedback form is available in the video description. Fill it out, and our specialists will definitely contact you. With the promo code "Business," we offer you 1 hour of consultation with our experienced analyst, as well as additional bonuses after the meeting.
+
+[0:59]
+And now let’s proceed to our instructions. Enjoy the video. The construction sector always involves large-scale projects, a large number of contractors, suppliers, materials, and tight deadlines. In such conditions, manual management of processes and communications leads to delays, losses, and rising costs. Implementing the Bitrix24 CRM system allows you to take control not only of sales but also of internal business processes in a construction company. And who is this CRM system suitable for? It is for construction companies, renovation and maintenance firms, architectural bureaus, building material distributors , and property management companies.
+
+[1:41]
+And why do they even need a CRM system? First, it is project management. The CRM system simplifies the project management process, allowing you to track deadlines and resources at all stages of work. It also provides resource planning. Resource usage will be presented visually. The system will allow you to optimize them. It will also become easier to interact with contractors and performers. The system will track their tasks and how they are being fulfilled. The system will also allow you to systematize customer requests, respond to them in a timely manner, and improve the performance of sales managers. The system collects and analyzes work data, which is a big plus when working on management tasks. Oh, when solving management tasks. And now let’s move on to a more practical part, and look at the tasks that
+
+[2:36]
+Bitrix24 solves in construction. And first of all, that is project and task control. In front of you, you see the " Tasks and Projects" section in Bitrix24 . Tasks are presented in a list view.
+
+[2:52]
+But you can also open them as a Kanban board, by deadlines, or by my plan— whatever is most convenient for you. There is a choice. You can also view tasks in a calendar view and as a Gantt chart. Let’s switch to the Gantt chart and see how it looks. So, for example, here More details about tasks in Bitrix24 are covered in one of our videos on the channel. You can go and watch it. Let's move on to creating a task and see how it's done. To create a task, you need to provide a title, add a description, and assign the person responsible, the creator, co-assignees, and observers. You can also set a deadline; that is, it's optional, you can either set one or leave it blank.
+
+[3:46]
+If you don't set one, the task will have no deadline; if you do, it will have a clear due date. You can also schedule the timeline so that the task starts not right now, but from a specific moment. There are also various additional settings available. You can use them if necessary. There are also notifications for overdue tasks. That is, if a task is overdue, it will first be displayed here in red, and the time overdue will be indicated. Also, the number of overdue tasks will be shown right here in a red box, indicating their existence. Furthermore, to prevent overdue tasks, a notification will be sent to the assignee and anyone observing the task 24 hours before the deadline. Up here on the right, it will
+
+[4:47]
+show that the task will soon be overdue , so it must be completed to ensure the employee pays attention to it and starts working on it. All notifications will also be located here. And here, notifications will be shown indicating that a task is about to be overdue or is already overdue, as shown here.
+
+[5:10]
+Besides that, you can monitor the progress of the task execution. Let's go into any task. You can look at the comments that employees are writing for the task. Here you can write the result of the task, attach files, mention employees so they notice the task, view the history, and monitor progress— such as when an employee started, changed something, or tracked time. So, you can track time within a task, for example, as you see here. Now let's move on to the next section, which is the CRM. In the CRM, you can keep a history of inquiries and deals. There is a Leads section and a Deals section.
+
+[6:03]
+In both leads and deals, you can change the pipeline, that is, change the stages, configure them, name them however you like, and add new ones. Also, both deals and leads have a deal or lead card. Let's go ahead and see what it looks like. On the left side of the deal card, it first shows the deal information, such as the stage it is at , the amount, client information, details about the person responsible for this deal, product information, and various other additional details. On the right, you can see the deal timeline, which shows everything happening with the deal. So, if there are any attached documents or messages, for instance, from various messengers you’ve connected, those will also be displayed here. Tasks will be shown here, and if 1C is connected, all
+
+[7:05]
+interactions with 1C will also be displayed. Also, besides this, Bitrix24 has a client section. This is where you’ll see your contact directory, a list of all your clients. You can simply click on a client to go to their detailed information and view it. More detailed information is shown on the left. On the right, you’ll find interactions with the client, such as linked tasks, deals, online booking, documents, and so on, so nothing gets lost. Additionally, you can integrate telephony, email, or social networks.
+
+[7:51]
+Let’s go to the Contact Center. Integration with telephony and other social networks is set up here. As you can see, you can connect email, telephony, WhatsApp, Telegram, Viber, VKontakte, and so on. If a specific integration you need isn't here, it is most likely available in the Market.
+
+[8:17]
+For example, we also have a video with more details about the various integrations and the Contact Center.
+
+[8:32]
+Now, the next item is financial accounting and analytics. You can track expenses and income for projects and view summary analytics for leads, requests, sales, and traffic sources.
+
+[8:48]
+Analytics are located in the CRM, Analytics section. And here you have various CRM reports. For example, here is the chat statistics report. Let’s go back. You can also view statistics here, such as the sales funnel, and monitor manager performance to see how everyone is working. There are various pre-installed reports here, so you don't need to configure them yourself.
+
+[9:36]
+These reports are already ready, and they simply pull information directly from your system. For example, there are many, many reports. Reports are also shown in the BI Builder; there are reports not only in CRM, but also in the BI Builder. The BI Builder offers a more global selection of reports on completely different topics. The reports are built-in and shown as part of Bitrix24; these are ready-made reports provided initially. Reports in the Bitrix24 BI Builder look like this, in the form of these squares. You can create your own reports if the ones already in Bitrix24 are not enough; you
+
+[10:36]
+can build your own using those squares I showed you. So, there are pre-made blocks, and you can, roughly speaking, assemble a report from them. Besides that, Bitrix24 includes document workflow automation. To do this, let's go to the "EDM plus Goskey" section.
+
+[11:00]
+You can connect EDM and Goskey to sign documents within Bitrix24. Here, you can store contracts, acts, estimates, and project documentation. For instance , your documents will be located in the "My Documents" section, and also in the company safe, where all the necessary documents will be kept. You can also add document templates, meaning those documents you use constantly. You can add document templates here, keeping everything in one place so you don't lose or search for anything. You can also restrict access rights by roles, meaning that only specific employees can access this section or perform specific actions. Here are the access rights to add roles. You can add roles and configure specific actions for a role, add specific people to these
+
+[12:02]
+roles, or assign sections. You see how it looks. And for HR documents here, in this section, there are also stages. That is, for example, the signing process, how it all happens. This is also fully customizable, can be added to, or changed. Besides this, you can collaborate on files, meaning you can create a file and edit it together, just like Google Docs, but inside Bitrix, so everything stays in one place, more secure, and nothing leaks out. And also in Bitrix24, you can set up communication between departments, and it will all be in a single digital
+
+[13:02]
+space. There is a feed where employees can write various posts, roughly speaking, messages, and send them to specific employees, departments, or everyone. And that is how they will be displayed. Furthermore, you can integrate with 1C, accounting systems, warehouses, and logistics services.
+
+[13:29]
+This is very convenient, especially for the construction industry. There is also a mobile version for remote access . For example, if an employee is at a site and doesn't have access to a computer, as an option, they can download Bitrix24 to their smartphone, where they will have access to their chats, tasks, and calendar. Basically, all the essentials. And everything will be at their fingertips. They can also track time there, meaning start a task, finish a task, write messages, add comments to tasks, and check their calendar to see when they have meetings or tasks to complete. In short, everything is on the phone. Very convenient. Let's talk a little bit about the benefits of implementing an industry-specific CRM system. First of all, it's repeat sales. The system will
+
+[14:30]
+automatically remind the manager to schedule the next contact date with the client and guide the manager step-by-step. That is, if you set up a CRM system, or if we set it up for you, then all of this will become possible.
+
+[14:47]
+Furthermore, it provides automated control for customer retention. This means the system will notify a supervisor for a check if a manager indicates that a client is not ready to make a repeat purchase. It also provides control over delivery deadlines. The system will send notifications to the manager and the supervisor if a delivery deadline is approaching. All of this can also be done here. The system will also send payment reminders. After an order has been delivered to a client, the system will remind the manager that the client needs to pay for the goods. How can all of this be done? All of this can be done using robots and triggers. They are located in both leads and deals.
+
+[15:23]
+These are our assistants that automate processes. Here they are, the robots. And you can add robots and triggers at various stages. For example, here is document preparation. A notification is sent to the responsible manager. At the shipment stage, an SMS is sent to the client stating, for example, that the goods have been shipped. Yes, in general, you can automate processes.
+
+[15:45]
+There are quite a lot of robots and triggers to simplify the process as much as possible and automate it. That is, here they all are. Also, the system suggests to managers what needs to be done, as well as with which clients to schedule tasks. Besides that, there are sales scripts, meaning when a manager contacts a client, if you connect sales scripts—that is, key analytics—and create specific scripts, well, here is what it looks like. So, a manager calls a client, and a window like this pops up for the manager so they have a clear plan on how to talk to the client. This is especially useful for beginners, or
+
+[16:46]
+managers who are not quite experienced, and in principle, it will be useful for everyone to have a clear structure in front of them so that no points are missed, and everything is covered and explained. And for different categories of clients, as you can see, you can create different scripts. And for different types of calls. Very convenient. And let's summarize. For a construction company striving for systematic work and reducing losses, the Bitrix24 CRM system becomes a critically important management element . It is not just some digital tool. It is a platform capable of building a transparent, controlled, and scalable work model. And on that note, we will finish. Thank you for your attention.
+
+[17:30]
+And don't forget to subscribe to our channel on YouTube and VKontakte. That is where we share interesting articles and case studies. Goodbye.
