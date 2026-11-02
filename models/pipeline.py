@@ -38,9 +38,15 @@ def main():
 
     by_stage = OrderedDict()
     total, no_amount = 0, []
-    flags = []
+    flags, closed = [], []
     for r in rows:
+        if r.get("stage", "").strip() == "отказ":
+            closed.append((r["id"], r["name"], r["next_step"]))
+            continue
         amt = int(r["amount"]) if r["amount"].strip() else None
+        if amt is None and r.get("qty", "").strip() and r.get("unit_price", "").strip():
+            amt = int(r["qty"]) * int(r["unit_price"])   # объём × цена за единицу
+            r["amount"] = str(amt)
         st = by_stage.setdefault(r["stage"], {"n": 0, "sum": 0, "no_sum": 0})
         st["n"] += 1
         if amt is None:
@@ -62,7 +68,7 @@ def main():
         if f:
             flags.append((r["id"], r["name"], f))
 
-    print(f"Позиций в воронке: {len(rows)}")
+    print(f"Позиций в воронке: {len(rows) - len(closed)} (отказов: {len(closed)})")
     print(f"Сумма заявленных объёмов: {rub(total)} ₽ "
           f"(без суммы: {len(no_amount)} — {', '.join(no_amount) or 'нет'})\n")
     print(f"{'стадия':<18}{'шт':>4}{'сумма, ₽':>16}{'без суммы':>11}")
@@ -70,10 +76,17 @@ def main():
         print(f"{k:<18}{v['n']:>4}{rub(v['sum']):>16}{v['no_sum']:>11}")
     if total:
         print("\nДоля крупнейших позиций в заявленной сумме:")
+        closed_ids = {c[0] for c in closed}
         sized = sorted(((int(r["amount"]), r["id"], r["name"]) for r in rows
-                        if r["amount"].strip()), reverse=True)
+                        if r["amount"].strip() and r["id"] not in closed_ids), reverse=True)
+        vat = {r["id"]: r.get("vat", "?") for r in rows}
         for amt, i, n in sized:
-            print(f"  {i} {n[:45]:<45} {rub(amt):>13} ₽  {amt / total:6.1%}")
+            print(f"  {i} {n[:45]:<45} {rub(amt):>13} ₽  {amt / total:6.1%}  {vat[i]}")
+        print("  (НДС у позиций разный — суммы сравнимы только приблизительно)")
+    if closed:
+        print("\nОтказы:")
+        for i, n, why in closed:
+            print(f"  {i} {n[:45]:<45} {why}")
     print("\nФлаги (до решения — через templates/чек-лист-нового-проекта.md):")
     for i, n, f in flags:
         print(f"  {i} {n[:45]:<45} {'; '.join(f)}")
