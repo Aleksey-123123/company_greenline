@@ -22,16 +22,25 @@ class DataError(Exception):
     pass
 
 
+def num(value: str) -> float:
+    """Число из выгрузки Excel/1С: «12 345 678,90» и «12345678.90» — одинаково."""
+    return float(value.replace("\u00a0", "").replace(" ", "").replace(",", "."))
+
+
 def load(path: str) -> list:
     rows = []
-    with open(path, newline="", encoding="utf-8") as f:
-        for r in csv.DictReader(f):
+    # utf-8-sig: Excel пишет в начало файла метку кодировки (BOM)
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        first = f.readline()
+        f.seek(0)
+        delim = ";" if first.count(";") > first.count(",") else ","
+        for r in csv.DictReader(f, delimiter=delim):
             if not r.get("id") or r["id"].strip().startswith("#"):
                 continue
             try:
-                amount = float(r["amount"])
-                prob = float(r["probability"])
-                weeks = float(r["weeks"])
+                amount = num(r["amount"])
+                prob = num(r["probability"])
+                weeks = num(r["weeks"])
             except (KeyError, ValueError) as e:
                 raise DataError(f"строка {r.get('id', '?')}: {e}")
             if not 0.0 <= prob <= 1.0:
